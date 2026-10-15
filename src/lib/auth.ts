@@ -45,7 +45,8 @@ export function createUser(u: {
   return Number(res.lastInsertRowid);
 }
 
-export async function startSession(userId: number) {
+/** Creates a session row; the token goes in a cookie (web) or is returned to the app (Bearer). */
+export function createSessionToken(userId: number) {
   const token = crypto.randomBytes(32).toString("base64url");
   const expires = new Date(Date.now() + SESSION_DAYS * 864e5);
   db.prepare("INSERT INTO sessions (token, user_id, expires_at) VALUES (?,?,?)").run(
@@ -53,6 +54,15 @@ export async function startSession(userId: number) {
     userId,
     expires.toISOString(),
   );
+  return { token, expires };
+}
+
+export function revokeSessionToken(token: string) {
+  db.prepare("DELETE FROM sessions WHERE token = ?").run(token);
+}
+
+export async function startSession(userId: number) {
+  const { token, expires } = createSessionToken(userId);
   (await cookies()).set(SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
@@ -66,7 +76,7 @@ export async function startSession(userId: number) {
 export async function endSession() {
   const jar = await cookies();
   const token = jar.get(SESSION_COOKIE)?.value;
-  if (token) db.prepare("DELETE FROM sessions WHERE token = ?").run(token);
+  if (token) revokeSessionToken(token);
   jar.delete(SESSION_COOKIE);
 }
 

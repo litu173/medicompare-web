@@ -1,9 +1,8 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { z } from "zod";
 import { createUser, endSession, findUserByEmail, hashPassword, startSession, verifyPassword } from "@/lib/auth";
-import { BD_PHONE } from "@/lib/bd";
+import { RegisterSchema } from "@/lib/validation";
 
 export type FormState = { error?: string; fields?: Record<string, string> } | undefined;
 
@@ -12,16 +11,6 @@ function safeNext(v: FormDataEntryValue | null) {
   const s = typeof v === "string" ? v : "";
   return s.startsWith("/") && !s.startsWith("//") ? s : "/account";
 }
-
-const RegisterSchema = z.object({
-  name: z.string().trim().min(2, "Please enter your name"),
-  email: z.email("Enter a valid email").trim().toLowerCase(),
-  phone: z
-    .string()
-    .trim()
-    .refine((v) => v === "" || BD_PHONE.test(v), "Enter a valid Bangladeshi mobile number (01XXXXXXXXX)"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-});
 
 export async function register(_prev: FormState, form: FormData): Promise<FormState> {
   const raw = Object.fromEntries(["name", "email", "phone", "password"].map((k) => [k, String(form.get(k) ?? "")]));

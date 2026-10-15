@@ -71,10 +71,21 @@ Things to know before going live:
 | GET | `/api/v1/medicines/:id` | Product, packs, alternatives, drug info |
 | GET | `/api/v1/generics/:slug` | All strengths and forms of a generic |
 | POST | `/api/v1/cart/quote` | `{items:[{packId,qty}], district}` → server prices, stock, delivery fee, cheaper suggestions |
+| GET | `/api/v1/home` | Catalog stats, popular searches, biggest price gaps |
+| GET | `/api/v1/meta` | Divisions/districts, payment methods, delivery fees, order statuses |
+| GET | `/api/v1/companies`, `/api/v1/companies/:slug?page=` | Companies; a company's products with cheaper-equivalent counts |
+| POST | `/api/v1/auth/register` | `{name,email,phone?,password}` → `{token, expiresAt, user}` |
+| POST | `/api/v1/auth/login` | `{email,password}` → `{token, expiresAt, user}` |
+| POST | `/api/v1/auth/logout` | Revokes the Bearer token (204) |
+| GET | `/api/v1/auth/me` | Current user (Bearer) |
+| POST | `/api/v1/orders` | Checkout (same validation as the web form) → `{code, total, token?}`; guest, Bearer, or `createAccount` |
+| GET | `/api/v1/orders` | Signed-in user's orders (Bearer) |
+| GET | `/api/v1/orders/:code` | Order + items for its owner (Bearer) or with `?phone=` matching the order (guest tracking) |
+| GET/POST/DELETE | `/api/v1/addresses` (`DELETE ?id=`) | Saved addresses (Bearer) |
 
-Before the mobile app, add: token login/register endpoints (`userFromToken` in `src/lib/auth.ts` already resolves
-session tokens, so a Bearer header can reuse it), an order-placement endpoint wrapping `placeOrder()`,
-and order history. Moving from SQLite to Postgres is straightforward because all SQL lives in `src/lib`.
+The mobile app (`../mobile`) sends the session token as `Authorization: Bearer <token>`; the same `sessions` table
+backs the web cookie. Prescription upload is web-only for now. Moving from SQLite to Postgres is straightforward
+because all SQL lives in `src/lib`.
 
 ## Production TODO
 

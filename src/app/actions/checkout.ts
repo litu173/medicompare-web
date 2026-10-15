@@ -4,36 +4,11 @@ import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { cookies } from "next/headers";
-import { z } from "zod";
-import { db } from "@/lib/db";
 import { createUser, findUserByEmail, getCurrentUser, hashPassword, startSession } from "@/lib/auth";
-import { BD_PHONE, DIVISIONS, PAYMENT_METHODS } from "@/lib/bd";
+import { CheckoutSchema, saveAddress } from "@/lib/validation";
 import { OrderError, placeOrder } from "@/lib/orders";
 
 export type CheckoutState = { error?: string; code?: string } | undefined;
-
-const Schema = z
-  .object({
-    name: z.string().trim().min(2, "Please enter the recipient's name"),
-    phone: z.string().trim().regex(BD_PHONE, "Enter a valid Bangladeshi mobile number (01XXXXXXXXX)"),
-    email: z.union([z.literal(""), z.email("Enter a valid email")]),
-    division: z.string().refine((d) => d in DIVISIONS, "Choose a division"),
-    district: z.string().min(1, "Choose a district"),
-    area: z.string().trim().min(2, "Enter your area / thana"),
-    line: z.string().trim().min(4, "Enter house, road and other details"),
-    note: z.string().trim().max(500).optional(),
-    payment: z.string().refine((p) => PAYMENT_METHODS.some((m) => m.id === p && m.enabled), "Choose a payment method"),
-    createAccount: z.boolean(),
-    password: z.string().optional(),
-    saveAddress: z.boolean(),
-    cart: z
-      .array(z.object({ packId: z.number().int(), qty: z.number().int().min(1).max(99) }))
-      .min(1, "Your cart is empty"),
-  })
-  .refine((d) => DIVISIONS[d.division]?.includes(d.district), { message: "Choose a district", path: ["district"] })
-  .refine((d) => !d.createAccount || (d.email && (d.password?.length ?? 0) >= 8), {
-    message: "To create an account, enter your email and a password of at least 8 characters",
-  });
 
 const RX_TYPES: Record<string, string> = {
   "image/jpeg": "jpg",
@@ -62,7 +37,7 @@ export async function placeOrderAction(_prev: CheckoutState, form: FormData): Pr
   } catch {
     cart = [];
   }
-  const parsed = Schema.safeParse({
+  const parsed = CheckoutSchema.safeParse({
     name: form.get("name") ?? "",
     phone: String(form.get("phone") ?? "").replace(/[\s-]/g, ""),
     email: String(form.get("email") ?? "")
@@ -114,15 +89,7 @@ export async function placeOrderAction(_prev: CheckoutState, form: FormData): Pr
     });
 
     if (userId && (d.saveAddress || d.createAccount)) {
-      const dup = db
-        .prepare("SELECT id FROM addresses WHERE user_id = ? AND phone = ? AND district = ? AND area = ? AND line = ?")
-        .get(userId, d.phone, d.district, d.area, d.line);
-      if (!dup) {
-        const first = !db.prepare("SELECT 1 FROM addresses WHERE user_id = ?").get(userId);
-        db.prepare(
-          "INSERT INTO addresses (user_id,name,phone,division,district,area,line,is_default) VALUES (?,?,?,?,?,?,?,?)",
-        ).run(userId, d.name, d.phone, d.division, d.district, d.area, d.line, first ? 1 : 0);
-      }
+      saveAddress(userId, d);
     }
 
     if (!userId) {
