@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MediCompare BD
 
-## Getting Started
+Mobile-first web store that shows every equivalent medicine brand sold in Bangladesh, **cheapest first**.
+Search by brand (e.g. *Napa*) or generic/chemical name (e.g. *Paracetamol*). Every result expands to its full
+equivalence group (same generic + strength + dosage form), so a cheaper or in-stock alternative is always visible.
 
-First, run the development server:
+## Quick start
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run db:import      # builds data/medicare.db from data/raw/*.csv (~10 s)
+cp .env.example .env.local   # optional: Google sign-in, admin emails
+npm run dev            # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Create an admin (manages orders at `/admin`): set `ADMIN_EMAIL`/`ADMIN_PASSWORD` in `.env.local`, then
+`npm run db:admin`. Any email listed in `ADMIN_EMAILS` also gets admin access.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+> Stop the dev server before re-running `npm run db:import`. The importer rebuilds catalog tables in place
+> (users and orders are kept) and a running server will keep reading stale data until restarted.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Features
 
-## Learn More
+- **Search** (SQLite FTS5, prefix matching) across brand, generic and company names, with typeahead.
+- **Equivalence groups**: results grouped by generic + strength + form, ranked by price per unit
+  (per tablet, per ml, per gm…), with “Cheapest”, “Save X%” and “Searched” markers and dosage-form filters.
+- **Product page**: pack options (single piece / box / bottle sizes), stock status, cheaper-equivalent banner,
+  full equivalent list, other strengths/forms, and drug information (indications, dosage, side effects…).
+- **Generic and company pages**: company pages show how many products have cheaper equivalents elsewhere.
+- **Cart** (stored on the device; prices and stock are re-checked on the server) that suggests a cheaper
+  equivalent for each item.
+- **Checkout**: guest checkout or create an account inline, sign in with email/password or Google,
+  saved addresses, all 64 districts, delivery fee (৳60 in Dhaka, ৳120 outside, free over ৳1,000),
+  optional prescription upload, Cash on Delivery (bKash/Nagad/card shown as “coming soon”).
+- **Orders**: confirmation page with status timeline, guest order tracking (`/track`, order ID + phone),
+  account order history, admin order management (status updates, cancellations restore stock).
 
-To learn more about Next.js, take a look at the following resources:
+## Data
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+`data/raw/` contains the open-source *Bangladesh medicines* dataset (scraped from MedEx), via
+[myselfadib/Bangladesh-Medicines-Dataset-Analysis](https://github.com/myselfadib/Bangladesh-Medicines-Dataset-Analysis):
+21,714 brands, 1,711 generics with monographs, and 240 manufacturers.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Things to know before going live:
 
-## Deploy on Vercel
+- **Prices are a snapshot** from when the dataset was scraped and must be refreshed. The authoritative source
+  for maximum retail prices is DGDA. The repo has no license file, so confirm you're allowed to use the data
+  commercially, or replace it with a licensed or official feed.
+- **Stock is demo data.** It's generated deterministically (about 8% of products out of stock) until a real
+  pharmacy or distributor inventory feed is connected.
+- **48 outlier prices** (less than ¼ or more than 4× their group's median) are flagged “Price unverified” and left
+  out of savings claims.
+- **Equivalence** is matched on generic name + strength + dosage form. Release types such as Extended or Delayed
+  Release are kept separate on purpose. Pages tell users to consult a doctor or pharmacist before switching.
+- The dataset doesn't mark which medicines need a prescription, so a prescription upload is optional at checkout.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Architecture
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Next.js 16 (App Router) + React 19 + Tailwind CSS 4, TypeScript
+- SQLite via `better-sqlite3` (`data/medicare.db`): catalog tables plus users, sessions, addresses, orders
+- Auth: bcrypt passwords, opaque session tokens (httpOnly cookie), Google OAuth 2.0 code flow (no extra library)
+- Key files: `src/lib/catalog.ts` (search and equivalence), `src/lib/orders.ts` (pricing, stock, orders),
+  `scripts/import-data.ts` (data pipeline), `src/lib/schema.ts` (schema)
+
+## JSON API (for the Flutter app, phase 2)
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| GET | `/api/v1/suggest?q=` | Typeahead: brands and generics |
+| GET | `/api/v1/search?q=&form=` | Equivalence groups, cheapest first |
+| GET | `/api/v1/medicines/:id` | Product, packs, alternatives, drug info |
+| GET | `/api/v1/generics/:slug` | All strengths and forms of a generic |
+| POST | `/api/v1/cart/quote` | `{items:[{packId,qty}], district}` → server prices, stock, delivery fee, cheaper suggestions |
+
+Before the mobile app, add: token login/register endpoints (`userFromToken` in `src/lib/auth.ts` already resolves
+session tokens, so a Bearer header can reuse it), an order-placement endpoint wrapping `placeOrder()`,
+and order history. Moving from SQLite to Postgres is straightforward because all SQL lives in `src/lib`.
+
+## Production TODO
+
+- Payment gateway (SSLCommerz / bKash / Nagad merchant APIs)
+- SMS or email order notifications, OTP phone login
+- Inventory and price admin (or supplier feed), DGDA price sync
+- Bangla UI (i18n)
+- Rate limiting on auth endpoints, and object storage for prescriptions
