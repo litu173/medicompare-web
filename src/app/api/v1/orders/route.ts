@@ -8,7 +8,10 @@ export function GET(req: Request) {
   const user = apiUser(req);
   if (!user) return unauthorized();
   return Response.json({
-    orders: getUserOrders(user.id).map(({ prescription_file, ...o }) => ({ ...o, has_prescription: !!prescription_file })),
+    orders: getUserOrders(user.id).map(({ prescription_file, ...o }) => ({
+      ...o,
+      has_prescription: !!prescription_file,
+    })),
   });
 }
 
@@ -39,7 +42,12 @@ export async function POST(req: Request) {
   let token: string | undefined;
   if (!user && d.createAccount) {
     if (findUserByEmail(d.email)) return apiError("An account with this email exists. Sign in instead.", 409);
-    userId = createUser({ name: d.name, email: d.email, phone: d.phone, passwordHash: await hashPassword(d.password!) });
+    userId = createUser({
+      name: d.name,
+      email: d.email,
+      phone: d.phone,
+      passwordHash: await hashPassword(d.password!),
+    });
     token = createSessionToken(userId).token;
   }
 

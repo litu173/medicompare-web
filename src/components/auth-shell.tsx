@@ -32,7 +32,7 @@ export function AuthShell({
       {googleEnabled() && (
         <>
           <GoogleButton next={next} />
-          <div className="flex items-center gap-3 text-xs text-gray-400">
+          <div className="flex items-center gap-3 text-xs text-gray-500">
             <span className="h-px flex-1 bg-gray-200" /> or <span className="h-px flex-1 bg-gray-200" />
           </div>
         </>

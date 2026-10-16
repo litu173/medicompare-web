@@ -14,11 +14,13 @@ export type Quote = {
     lineTotal: number;
     available: boolean;
     maxQty: number;
+    image: string | null;
     cheaper: { medicineId: number; brandName: string; manufacturer: string; savePct: number } | null;
   }[];
   subtotal: number;
   deliveryFee: number;
   total: number;
+  freeOver: number;
   allAvailable: boolean;
 };
 

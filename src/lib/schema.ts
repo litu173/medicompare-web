@@ -48,8 +48,7 @@ CREATE TABLE IF NOT EXISTS medicines (
   list_price REAL,                    -- price of the default (smallest) pack
   list_label TEXT,                    -- e.g. 'tablet', '100 ml bottle'
   price_text TEXT,
-  price_suspect INTEGER NOT NULL DEFAULT 0, -- far from the group median: likely a data error
-  stock INTEGER NOT NULL DEFAULT 0
+  price_suspect INTEGER NOT NULL DEFAULT 0 -- far from the group median: likely a data error
 );
 CREATE INDEX IF NOT EXISTS idx_med_equiv ON medicines(equiv_key, compare_price);
 CREATE INDEX IF NOT EXISTS idx_med_generic ON medicines(generic_id, compare_price);
@@ -124,6 +123,53 @@ CREATE TABLE IF NOT EXISTS orders (
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+-- Operational data below survives catalog re-imports.
+
+-- Stock and product photo per medicine (stock counted in single units: tablets, bottles...).
+CREATE TABLE IF NOT EXISTS inventory (
+  medicine_id INTEGER PRIMARY KEY,
+  stock INTEGER NOT NULL DEFAULT 0,
+  low_stock_at INTEGER NOT NULL DEFAULT 30,
+  image TEXT,
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_inventory_stock ON inventory(stock);
+
+-- Every stock change, for audits and mismatch investigation.
+CREATE TABLE IF NOT EXISTS stock_movements (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  medicine_id INTEGER NOT NULL,
+  delta INTEGER NOT NULL,
+  reason TEXT NOT NULL,               -- order | cancel | restock | adjust | initial
+  ref TEXT,                           -- order code, supplier invoice...
+  note TEXT,
+  user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_moves_med ON stock_movements(medicine_id, id);
+
+-- Admin price edits, re-applied after each catalog import.
+CREATE TABLE IF NOT EXISTS price_overrides (
+  pack_id INTEGER PRIMARY KEY,
+  price REAL NOT NULL,
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS order_events (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+  status TEXT NOT NULL,
+  note TEXT,
+  actor TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_events_order ON order_events(order_id, id);
+
+CREATE TABLE IF NOT EXISTS settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS order_items (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
@@ -136,3 +182,23 @@ CREATE TABLE IF NOT EXISTS order_items (
   qty INTEGER NOT NULL
 );
 `;
+
+/** Columns added after the first release; ALTER TABLE for databases created earlier. */
+const COLUMN_MIGRATIONS: [table: string, column: string, ddl: string][] = [
+  ["orders", "rider_name", "TEXT"],
+  ["orders", "rider_phone", "TEXT"],
+  ["orders", "tracking_note", "TEXT"],
+  ["orders", "cancel_reason", "TEXT"],
+  ["orders", "updated_at", "TEXT"],
+  ["order_items", "packed", "INTEGER NOT NULL DEFAULT 0"],
+];
+
+type Db = { exec(sql: string): unknown; prepare(sql: string): { all(): unknown[] } };
+
+export function migrate(db: Db) {
+  db.exec(APP_SCHEMA);
+  for (const [table, column, ddl] of COLUMN_MIGRATIONS) {
+    const cols = db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[];
+    if (!cols.some((c) => c.name === column)) db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${ddl}`);
+  }
+}

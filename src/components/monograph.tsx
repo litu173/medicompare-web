@@ -25,14 +25,14 @@ export function Monograph({ generic }: { generic: Generic }) {
         <details key={key} open={i === 0} className="group">
           <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-semibold [&::-webkit-details-marker]:hidden">
             {title}
-            <span className="text-gray-400 transition group-open:rotate-45">+</span>
+            <span className="text-gray-500 transition group-open:rotate-45">+</span>
           </summary>
           <div className="whitespace-pre-line px-4 pb-4 text-sm leading-relaxed text-gray-700">
             {String(generic[key])}
           </div>
         </details>
       ))}
-      <p className="bg-gray-50 px-4 py-3 text-[11px] text-gray-500">
+      <p className="bg-gray-50 px-4 py-3 text-[11px] text-gray-600">
         Source: open MedEx-derived dataset. For reference only — follow your doctor&apos;s prescription.
       </p>
     </div>

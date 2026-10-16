@@ -78,7 +78,7 @@ export function SearchBox({ compact = false, autoFocus = false }: { compact?: bo
           compact ? "h-10 px-3" : "h-13 px-4 shadow-sm"
         }`}
       >
-        <Search className="size-4.5 shrink-0 text-gray-400" />
+        <Search className="size-4.5 shrink-0 text-gray-500" />
         <input
           id={compact ? "q-compact" : "q-hero"}
           value={q}
@@ -92,10 +92,10 @@ export function SearchBox({ compact = false, autoFocus = false }: { compact?: bo
           enterKeyHint="search"
           type="search"
           placeholder={compact ? "Search medicine…" : "Brand or generic, e.g. Napa, Omeprazole"}
-          className="min-w-0 flex-1 bg-transparent text-[16px] outline-none placeholder:text-gray-400 [&::-webkit-search-cancel-button]:hidden"
+          className="min-w-0 flex-1 bg-transparent text-[16px] outline-none placeholder:text-gray-500 [&::-webkit-search-cancel-button]:hidden"
         />
         {q && (
-          <button type="button" aria-label="Clear" onClick={() => setQ("")} className="text-gray-400">
+          <button type="button" aria-label="Clear" onClick={() => setQ("")} className="text-gray-500">
             <X className="size-4" />
           </button>
         )}
@@ -110,7 +110,7 @@ export function SearchBox({ compact = false, autoFocus = false }: { compact?: bo
         <div className="absolute inset-x-0 top-full z-40 mt-1 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl">
           {data.generics.length > 0 && (
             <div className="border-b border-gray-100 p-1.5">
-              <p className="px-2 pb-1 pt-1 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+              <p className="px-2 pb-1 pt-1 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                 Generic (chemical) name
               </p>
               {data.generics.map((g) => (
@@ -122,14 +122,14 @@ export function SearchBox({ compact = false, autoFocus = false }: { compact?: bo
                 >
                   <FlaskConical className="size-4 text-brand-600" />
                   <span className="flex-1 font-medium">{g.name}</span>
-                  <span className="text-xs text-gray-500">{g.brand_count} brands</span>
+                  <span className="text-xs text-gray-600">{g.brand_count} brands</span>
                 </Link>
               ))}
             </div>
           )}
           {data.brands.length > 0 && (
             <div className="p-1.5">
-              <p className="px-2 pb-1 pt-1 text-[11px] font-semibold uppercase tracking-wide text-gray-400">Brands</p>
+              <p className="px-2 pb-1 pt-1 text-[11px] font-semibold uppercase tracking-wide text-gray-500">Brands</p>
               {data.brands.map((b) => (
                 <Link
                   key={b.id}
@@ -139,8 +139,8 @@ export function SearchBox({ compact = false, autoFocus = false }: { compact?: bo
                 >
                   <span className="min-w-0 flex-1">
                     <span className="font-medium">{b.brand_name}</span>{" "}
-                    <span className="text-gray-500">{b.strength}</span>
-                    <span className="block truncate text-xs text-gray-500">
+                    <span className="text-gray-600">{b.strength}</span>
+                    <span className="block truncate text-xs text-gray-600">
                       {b.dosage_form} · {b.generic_name}
                     </span>
                   </span>

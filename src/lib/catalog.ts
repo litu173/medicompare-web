@@ -23,19 +23,26 @@ export type MedicineRow = {
   stock: number;
   price_suspect: number;
   pack_id: number | null;
+  /** Product photo URL, or null when no photo has been uploaded yet. */
+  image: string | null;
 };
+
+/** SQL expression for a product photo URL from the inventory table aliased `inv`. */
+export const IMAGE_SQL = "CASE WHEN inv.image IS NOT NULL THEN '/media/products/' || inv.image END";
 
 export type Pack = { id: number; medicine_id: number; label: string; qty: number; price: number };
 
 const MED_SELECT = `
   SELECT m.*, g.slug AS generic_slug, f.name AS manufacturer_name, f.slug AS manufacturer_slug,
-         (SELECT p.id FROM packs p WHERE p.medicine_id = m.id ORDER BY p.sort LIMIT 1) AS pack_id
+         (SELECT p.id FROM packs p WHERE p.medicine_id = m.id ORDER BY p.sort LIMIT 1) AS pack_id,
+         COALESCE(inv.stock, 0) AS stock, ${IMAGE_SQL} AS image
   FROM medicines m
   JOIN manufacturers f ON f.id = m.manufacturer_id
-  LEFT JOIN generics g ON g.id = m.generic_id`;
+  LEFT JOIN generics g ON g.id = m.generic_id
+  LEFT JOIN inventory inv ON inv.medicine_id = m.id`;
 
 // Unpriced items go last; in-stock before out-of-stock at the same price.
-const PRICE_ORDER = "m.compare_price IS NULL, m.compare_price, m.stock = 0, m.brand_name";
+const PRICE_ORDER = "m.compare_price IS NULL, m.compare_price, COALESCE(inv.stock, 0) = 0, m.brand_name";
 
 /** Turns free text into a safe FTS5 prefix query: "napa ext" -> "napa"* "ext"* */
 export function toFtsQuery(q: string) {
@@ -59,8 +66,9 @@ export function getPacksByIds(ids: number[]) {
   return db
     .prepare(
       `SELECT p.id AS pack_id, p.label, p.qty, p.price, m.id AS medicine_id, m.brand_name, m.strength, m.dosage_form,
-              m.generic_name, m.stock, f.name AS manufacturer_name
+              m.generic_name, COALESCE(inv.stock, 0) AS stock, f.name AS manufacturer_name, ${IMAGE_SQL} AS image
        FROM packs p JOIN medicines m ON m.id = p.medicine_id JOIN manufacturers f ON f.id = m.manufacturer_id
+       LEFT JOIN inventory inv ON inv.medicine_id = m.id
        WHERE p.id IN (${ids.map(() => "?").join(",")})`,
     )
     .all(...ids) as {
@@ -75,6 +83,7 @@ export function getPacksByIds(ids: number[]) {
     generic_name: string;
     stock: number;
     manufacturer_name: string;
+    image: string | null;
   }[];
 }
 
@@ -192,8 +201,10 @@ export function suggest(q: string) {
   if (!fts) return { brands: [], generics: [] };
   const brands = db
     .prepare(
-      `SELECT m.id, m.brand_name, m.strength, m.dosage_form, m.generic_name, m.list_price, m.list_label
+      `SELECT m.id, m.brand_name, m.strength, m.dosage_form, m.generic_name, m.list_price, m.list_label,
+              ${IMAGE_SQL} AS image
        FROM medicines_fts JOIN medicines m ON m.id = medicines_fts.rowid
+       LEFT JOIN inventory inv ON inv.medicine_id = m.id
        WHERE medicines_fts MATCH ? ORDER BY bm25(medicines_fts, 10.0, 5.0, 1.0) LIMIT 6`,
     )
     .all(`{brand_name}: ${fts}`);

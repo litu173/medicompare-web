@@ -8,7 +8,8 @@ import fs from "node:fs";
 import path from "node:path";
 import Database from "better-sqlite3";
 import { parse } from "csv-parse/sync";
-import { APP_SCHEMA, CATALOG_SCHEMA } from "../src/lib/schema";
+import { CATALOG_SCHEMA, migrate } from "../src/lib/schema";
+import { comparePrice, unitNoun, type PackPrice } from "../src/lib/pricing";
 
 const ROOT = path.resolve(__dirname, "..");
 const RAW = path.join(ROOT, "data/raw");
@@ -44,34 +45,12 @@ function htmlToText(html?: string): string | null {
   return text || null;
 }
 
-function unitNoun(form: string) {
-  const f = form.toLowerCase();
-  if (f.includes("capsule")) return "capsule";
-  if (f.includes("tablet")) return "tablet";
-  if (f.includes("suppository")) return "suppository";
-  if (f.includes("sachet") || f.includes("powder")) return "sachet";
-  if (f.includes("patch")) return "patch";
-  return "piece";
-}
-
-type Pack = { label: string; qty: number; price: number };
-type Parsed = { packs: Pack[]; comparePrice: number | null; compareUnit: string | null };
-
 const SEGMENT = /([^:,()]+?):\s*৳\s*([\d,]+(?:\.\d+)?)(?:\s*,?\s*\((\d+)'s pack:\s*৳\s*([\d,]+(?:\.\d+)?)\))?/g;
 const num = (s: string) => Number(s.replace(/,/g, ""));
 
-/** Parses strings like "Unit Price: ৳ 15.00,(30's pack: ৳ 450.00)," or "100 ml bottle: ৳ 40.12". */
-function parsePrice(text: string, form: string): Parsed {
-  const packs: Pack[] = [];
-  let comparePrice: number | null = null;
-  let compareUnit: string | null = null;
-  const consider = (p: number, unit: string) => {
-    if (!(p > 0)) return;
-    if (comparePrice === null || p < comparePrice) {
-      comparePrice = p;
-      compareUnit = unit;
-    }
-  };
+/** Parses strings like "Unit Price: ৳ 15.00,(30's pack: ৳ 450.00)," or "100 ml bottle: ৳ 40.12" into packs. */
+function parsePacks(text: string, form: string): PackPrice[] {
+  const packs: PackPrice[] = [];
   const seen = new Set<string>();
   for (const m of text.matchAll(SEGMENT)) {
     const label = m[1].trim();
@@ -87,21 +66,14 @@ function parsePrice(text: string, form: string): Parsed {
       const noun = unitNoun(form);
       packs.push({ label: `1 ${noun}`, qty: 1, price });
       if (packQty && packPrice) packs.push({ label: `Box of ${packQty} ${noun}s`, qty: packQty, price: packPrice });
-      consider(price, noun);
     } else {
-      packs.push({ label, qty: 1, price });
-      if (packQty && packPrice) packs.push({ label: `Pack of ${packQty} × ${label}`, qty: packQty, price: packPrice });
-      const vol = label.match(/^([\d.]+)\s*(ml|gm)\b/i);
-      // "100's blister", "1000's tin", "30 tablet pack": a multi-piece pack, compare per piece.
+      // "100's blister", "1000's tin", "30 tablet pack" hold several pieces.
       const count = label.match(/^(\d+)(?:'s\b|\s+(?:tablet|capsule)s?\b)/i);
-      if (vol && Number(vol[1]) > 0) consider(price / Number(vol[1]), vol[2].toLowerCase());
-      else if (count && Number(count[1]) > 1) {
-        packs[packs.length - 1].qty = Number(count[1]);
-        consider(price / Number(count[1]), unitNoun(form));
-      } else consider(price, label.split(" ").pop() || "unit");
+      packs.push({ label, qty: count && Number(count[1]) > 1 ? Number(count[1]) : 1, price });
+      if (packQty && packPrice) packs.push({ label: `Pack of ${packQty} × ${label}`, qty: packQty, price: packPrice });
     }
   }
-  return { packs, comparePrice, compareUnit };
+  return packs;
 }
 
 const formGroup = (form: string) => form.replace(/\s*\((Film|Sugar) Coated\)/i, "").trim();
@@ -120,7 +92,7 @@ function main() {
   db.exec(`DROP TABLE IF EXISTS medicines_fts; DROP TABLE IF EXISTS packs; DROP TABLE IF EXISTS medicines;
            DROP TABLE IF EXISTS generics; DROP TABLE IF EXISTS manufacturers;`);
   db.exec(CATALOG_SCHEMA);
-  db.exec(APP_SCHEMA);
+  migrate(db);
 
   const manufacturers = readCsv("manufacturer.csv");
   const generics = readCsv("generic.csv");
@@ -167,10 +139,12 @@ function main() {
 
     const insMed =
       db.prepare(`INSERT INTO medicines (id,brand_name,type,dosage_form,form_group,generic_id,generic_name,strength,
-      strength_key,manufacturer_id,equiv_key,compare_price,compare_unit,list_price,list_label,price_text,stock)
-      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
+      strength_key,manufacturer_id,equiv_key,compare_price,compare_unit,list_price,list_label,price_text)
+      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
     // Stable ids (medicine id * 10 + position) so carts and order history survive re-imports.
     const insPack = db.prepare("INSERT INTO packs (id,medicine_id,label,qty,price,sort) VALUES (?,?,?,?,?,?)");
+    // Demo stock only for medicines that have no inventory row yet; real counts are never overwritten.
+    const seedStock = db.prepare("INSERT OR IGNORE INTO inventory (medicine_id, stock) VALUES (?, ?)");
     const insFts = db.prepare(
       "INSERT INTO medicines_fts (rowid,brand_name,generic_name,manufacturer) VALUES (?,?,?,?)",
     );
@@ -183,7 +157,8 @@ function main() {
       const strength = (r["strength"] || "").trim();
       const fg = formGroup(form);
       const sk = strengthKey(strength);
-      const { packs, comparePrice, compareUnit } = parsePrice(r["package container"] || "", form);
+      const packs = parsePacks(r["package container"] || "", form).slice(0, 10);
+      const cmp = comparePrice(packs, form);
       if (packs.length) priced++;
       const first = packs[0];
       const mfrId = mfrByName.get(r["manufacturer"])!;
@@ -199,14 +174,14 @@ function main() {
         sk,
         mfrId,
         `${generic.toLowerCase()}|${sk}|${fg.toLowerCase()}`,
-        comparePrice,
-        compareUnit,
+        cmp?.value ?? null,
+        cmp?.unit ?? null,
         first?.price ?? null,
         first?.label ?? null,
         r["package container"] || null,
-        packs.length ? demoStock(id) : 0,
       );
-      packs.slice(0, 10).forEach((p, i) => insPack.run(id * 10 + i, id, p.label, p.qty, p.price, i));
+      if (packs.length) seedStock.run(id, demoStock(id));
+      packs.forEach((p, i) => insPack.run(id * 10 + i, id, p.label, p.qty, p.price, i));
       insFts.run(id, r["brand name"], generic, r["manufacturer"]);
     }
 
@@ -229,6 +204,26 @@ function main() {
       flagged += flag.run(g.equiv_key, median / 4, median * 4).changes;
     }
     console.log(`Flagged ${flagged} outlier prices for review.`);
+
+    // Re-apply admin price edits on top of the fresh catalog.
+    const overrides = db.prepare("SELECT pack_id, price FROM price_overrides").all() as {
+      pack_id: number;
+      price: number;
+    }[];
+    const setPack = db.prepare("UPDATE packs SET price = ? WHERE id = ?");
+    for (const o of overrides) setPack.run(o.price, o.pack_id);
+    const touched = new Set(overrides.map((o) => Math.floor(o.pack_id / 10)));
+    const medPacks = db.prepare("SELECT label, qty, price, sort FROM packs WHERE medicine_id = ? ORDER BY sort");
+    const medForm = db.prepare("SELECT dosage_form FROM medicines WHERE id = ?");
+    const setMed = db.prepare("UPDATE medicines SET compare_price = ?, compare_unit = ?, list_price = ? WHERE id = ?");
+    for (const id of touched) {
+      const ps = medPacks.all(id) as PackPrice[];
+      const row = medForm.get(id) as { dosage_form: string } | undefined;
+      if (!row || !ps.length) continue;
+      const cmp = comparePrice(ps, row.dosage_form);
+      setMed.run(cmp?.value ?? null, cmp?.unit ?? null, ps[0].price, id);
+    }
+    if (overrides.length) console.log(`Re-applied ${overrides.length} admin price edits.`);
 
     db.exec(`
       UPDATE manufacturers SET

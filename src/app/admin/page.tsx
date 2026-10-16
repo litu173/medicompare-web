@@ -1,91 +1,208 @@
-import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { getCurrentUser } from "@/lib/auth";
-import { getAllOrders } from "@/lib/orders";
-import { ORDER_STATUSES } from "@/lib/bd";
+import {
+  AlertTriangle,
+  ArrowRight,
+  Bike,
+  Boxes,
+  CheckCheck,
+  ClipboardCheck,
+  FileText,
+  PackageCheck,
+  Wallet,
+} from "lucide-react";
+import { dashboardStats, findOrders, orderCounts } from "@/lib/orders";
+import { inventoryStats, listInventory } from "@/lib/inventory";
 import { taka } from "@/lib/format";
-import { updateOrderStatus } from "@/app/actions/account";
-import { StatusBadge } from "@/components/order-status";
+import { StatusBadge, fmtTime } from "@/components/order-status";
+import { MedicineThumb } from "@/components/medicine-thumb";
 
-export const metadata: Metadata = { title: "Admin · Orders" };
+export const metadata = { title: "Dashboard" };
 
-export default async function AdminPage({ searchParams }: PageProps<"/admin">) {
-  const user = await getCurrentUser();
-  if (user?.role !== "admin") notFound();
-  const { status } = await searchParams;
-  const filter =
-    typeof status === "string" && (ORDER_STATUSES as readonly string[]).includes(status) ? status : undefined;
-  const orders = getAllOrders(filter);
+export default function AdminDashboard() {
+  const counts = orderCounts();
+  const stats = dashboardStats();
+  const inv = inventoryStats();
+  const low = listInventory({ filter: "low", size: 6 }).rows;
+  const recent = findOrders({ limit: 6 });
+
+  // The daily workflow, in order. Each card opens the list of orders waiting at that step.
+  const queue = [
+    {
+      status: "placed",
+      label: "New — confirm",
+      hint: "Call customer, check Rx",
+      icon: ClipboardCheck,
+      tone: "bg-amber-50 text-amber-900 ring-amber-200",
+    },
+    {
+      status: "confirmed",
+      label: "To pack",
+      hint: "Pick & check every item",
+      icon: PackageCheck,
+      tone: "bg-orange-50 text-orange-900 ring-orange-200",
+    },
+    {
+      status: "packed",
+      label: "Ready to ship",
+      hint: "Assign delivery person",
+      icon: Boxes,
+      tone: "bg-sky-50 text-sky-900 ring-sky-200",
+    },
+    {
+      status: "shipped",
+      label: "Out for delivery",
+      hint: "Mark delivered on handover",
+      icon: Bike,
+      tone: "bg-blue-50 text-blue-900 ring-blue-200",
+    },
+  ];
 
   return (
-    <div className="space-y-4 pt-4">
-      <h1 className="text-2xl font-bold">Orders</h1>
-      <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4">
-        {[undefined, ...ORDER_STATUSES].map((s) => (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold">Today&apos;s work</h1>
+        <p className="text-sm text-gray-700">Work through each step left to right. Oldest orders are shown first.</p>
+      </div>
+
+      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {queue.map((q) => (
           <Link
-            key={s ?? "all"}
-            href={s ? `/admin?status=${s}` : "/admin"}
-            className={`shrink-0 rounded-full px-3 py-1.5 text-sm capitalize ${filter === s ? "bg-gray-900 text-white" : "border border-gray-200 bg-white"}`}
+            key={q.status}
+            href={`/admin/orders?status=${q.status}`}
+            className={`group rounded-2xl p-4 ring-1 hover:shadow-md ${q.tone}`}
           >
-            {s ?? "All"}
+            <div className="flex items-center justify-between">
+              <q.icon className="size-6" />
+              <span className="text-3xl font-bold tabular-nums">{counts[q.status] ?? 0}</span>
+            </div>
+            <p className="mt-2 font-semibold">{q.label}</p>
+            <p className="text-xs opacity-90">{q.hint}</p>
           </Link>
         ))}
-      </div>
-      {orders.length === 0 && <p className="text-sm text-gray-500">No orders.</p>}
-      <ul className="space-y-3">
-        {orders.map((o) => (
-          <li key={o.id} className="rounded-xl bg-white p-4 text-sm shadow-sm ring-1 ring-black/5">
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <Link href={`/order/${o.code}`} className="font-mono font-semibold text-brand-700">
-                  {o.code}
+      </section>
+
+      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <Stat
+          icon={Wallet}
+          label="Sales today"
+          value={taka(stats.today.revenue)}
+          sub={`${stats.today.orders} orders`}
+        />
+        <Stat
+          icon={CheckCheck}
+          label="Last 7 days"
+          value={taka(stats.week.revenue)}
+          sub={`${stats.week.orders} orders`}
+        />
+        <Stat icon={Bike} label="Cash to collect" value={taka(stats.codToCollect)} sub="from riders on the road" />
+        <Stat
+          icon={FileText}
+          label="Prescriptions to check"
+          value={String(stats.rxPending)}
+          sub="new orders with Rx"
+          href="/admin/orders?status=placed"
+        />
+      </section>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <section className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="font-semibold">Recent orders</h2>
+            <Link href="/admin/orders" className="flex items-center gap-1 text-sm font-semibold text-brand-700">
+              All orders <ArrowRight className="size-4" />
+            </Link>
+          </div>
+          {recent.length === 0 ? (
+            <p className="text-sm text-gray-600">No orders yet.</p>
+          ) : (
+            <ul className="divide-y divide-gray-100">
+              {recent.map((o) => (
+                <li key={o.id}>
+                  <Link href={`/admin/orders/${o.code}`} className="flex items-center gap-3 py-2.5 hover:bg-gray-50">
+                    <span className="min-w-0 flex-1">
+                      <span className="font-mono text-sm font-bold">{o.code}</span>
+                      <span className="block truncate text-xs text-gray-600">
+                        {o.name} · {o.area}, {o.district} · {fmtTime(o.created_at)}
+                      </span>
+                    </span>
+                    <span className="text-sm font-semibold tabular-nums">{taka(o.total)}</span>
+                    <StatusBadge status={o.status} />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        <section className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="flex items-center gap-2 font-semibold">
+              <AlertTriangle className="size-4 text-amber-700" /> Running low
+            </h2>
+            <Link
+              href="/admin/inventory?filter=low"
+              className="flex items-center gap-1 text-sm font-semibold text-brand-700"
+            >
+              {inv.low_stock} low · {inv.out_of_stock} out <ArrowRight className="size-4" />
+            </Link>
+          </div>
+          <ul className="divide-y divide-gray-100">
+            {low.map((m) => (
+              <li key={m.id}>
+                <Link href={`/admin/inventory/${m.id}`} className="flex items-center gap-3 py-2 hover:bg-gray-50">
+                  <MedicineThumb image={m.image} form={m.dosage_form} alt={m.brand_name} />
+                  <span className="min-w-0 flex-1">
+                    <span className="text-sm font-semibold">
+                      {m.brand_name} <span className="font-normal text-gray-600">{m.strength}</span>
+                    </span>
+                    <span className="block truncate text-xs text-gray-600">{m.manufacturer_name}</span>
+                  </span>
+                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-900">
+                    {m.stock} left
+                  </span>
                 </Link>
-                <p className="text-xs text-gray-500">
-                  {new Date(o.created_at + "Z").toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}
-                </p>
-              </div>
-              <StatusBadge status={o.status} />
-            </div>
-            <p className="mt-2">
-              {o.name} · {o.phone}
-              {o.user_id ? "" : " · guest"}
-            </p>
-            <p className="text-gray-600">
-              {o.area}, {o.district}
-            </p>
-            <p className="mt-1">
-              {o.item_count} items · <b>{taka(o.total)}</b> · {o.payment_method.toUpperCase()}
-            </p>
-            {o.prescription_file && (
-              <a
-                href={`/api/admin/prescriptions/${o.prescription_file}`}
-                target="_blank"
-                className="text-xs font-medium text-brand-700 underline"
-              >
-                View prescription
-              </a>
-            )}
-            {o.status !== "cancelled" && o.status !== "delivered" && (
-              <form key={o.status} action={updateOrderStatus} className="mt-3 flex gap-2">
-                <input type="hidden" name="code" value={o.code} />
-                <select
-                  name="status"
-                  defaultValue={o.status}
-                  className="h-10 flex-1 rounded-lg border border-gray-200 bg-white px-2 capitalize"
-                >
-                  {ORDER_STATUSES.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
-                <button className="rounded-lg bg-gray-900 px-4 font-medium text-white">Update</button>
-              </form>
-            )}
-          </li>
-        ))}
-      </ul>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 text-xs text-gray-600">
+            {inv.no_photo.toLocaleString()} of {inv.products.toLocaleString()} products still need a photo.{" "}
+            <Link href="/admin/inventory?filter=nophoto" className="font-semibold text-brand-700">
+              Add photos
+            </Link>
+          </p>
+        </section>
+      </div>
     </div>
+  );
+}
+
+function Stat({
+  icon: Icon,
+  label,
+  value,
+  sub,
+  href,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: string;
+  sub: string;
+  href?: string;
+}) {
+  const body = (
+    <>
+      <Icon className="size-5 text-gray-600" />
+      <p className="mt-2 text-xs font-medium uppercase tracking-wide text-gray-600">{label}</p>
+      <p className="text-xl font-bold tabular-nums">{value}</p>
+      <p className="text-xs text-gray-600">{sub}</p>
+    </>
+  );
+  const cls = "block rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5";
+  return href ? (
+    <Link href={href} className={`${cls} hover:ring-brand-600`}>
+      {body}
+    </Link>
+  ) : (
+    <div className={cls}>{body}</div>
   );
 }

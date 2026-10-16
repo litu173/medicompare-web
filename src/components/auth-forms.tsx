@@ -12,7 +12,7 @@ export function Field({ label, children, hint }: { label: string; children: Reac
     <label className="block">
       <span className="mb-1 block text-sm font-medium text-gray-700">{label}</span>
       {children}
-      {hint && <span className="mt-1 block text-xs text-gray-500">{hint}</span>}
+      {hint && <span className="mt-1 block text-xs text-gray-600">{hint}</span>}
     </label>
   );
 }

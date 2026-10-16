@@ -31,7 +31,7 @@ export function PackPicker({
   const [qty, setQty] = useState(perPiece(packs[0]) ? 10 : 1);
   const q = Math.min(qty, Math.max(1, maxQty));
 
-  if (!pack) return <p className="text-sm text-gray-500">This product is not available for online purchase.</p>;
+  if (!pack) return <p className="text-sm text-gray-600">This product is not available for online purchase.</p>;
   const soldOut = maxQty === 0;
 
   const doAdd = () =>
@@ -87,7 +87,7 @@ export function PackPicker({
           </button>
         </div>
         <div className="flex-1 text-right">
-          <p className="text-xs text-gray-500">Total</p>
+          <p className="text-xs text-gray-600">Total</p>
           <p className="text-xl font-bold tabular-nums">{taka(soldOut ? 0 : pack.price * q)}</p>
         </div>
       </div>

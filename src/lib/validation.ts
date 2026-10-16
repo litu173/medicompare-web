@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { db } from "./db";
-import { BD_PHONE, DIVISIONS, PAYMENT_METHODS } from "./bd";
+import { BD_PHONE, DIVISIONS, PAYMENT_METHODS, THANAS } from "./bd";
 
 // Shared by the web server actions and the /api/v1 endpoints the mobile app uses.
 
@@ -21,7 +21,7 @@ export const CheckoutSchema = z
     email: z.union([z.literal(""), z.email("Enter a valid email")]),
     division: z.string().refine((d) => d in DIVISIONS, "Choose a division"),
     district: z.string().min(1, "Choose a district"),
-    area: z.string().trim().min(2, "Enter your area / thana"),
+    area: z.string().trim().min(2, "Choose your thana / upazila"),
     line: z.string().trim().min(4, "Enter house, road and other details"),
     note: z.string().trim().max(500).optional(),
     payment: z.string().refine((p) => PAYMENT_METHODS.some((m) => m.id === p && m.enabled), "Choose a payment method"),
@@ -33,6 +33,7 @@ export const CheckoutSchema = z
       .min(1, "Your cart is empty"),
   })
   .refine((d) => DIVISIONS[d.division]?.includes(d.district), { message: "Choose a district", path: ["district"] })
+  .refine((d) => THANAS[d.district]?.includes(d.area), { message: "Choose your thana / upazila", path: ["area"] })
   .refine((d) => !d.createAccount || (d.email && (d.password?.length ?? 0) >= 8), {
     message: "To create an account, enter your email and a password of at least 8 characters",
   });
@@ -46,11 +47,12 @@ export const AddressSchema = z
       .pipe(z.string().regex(BD_PHONE, "Enter a valid Bangladeshi mobile number (01XXXXXXXXX)")),
     division: z.string().refine((d) => d in DIVISIONS, "Choose a division"),
     district: z.string().min(1, "Choose a district"),
-    area: z.string().trim().min(2, "Enter your area / thana"),
+    area: z.string().trim().min(2, "Choose your thana / upazila"),
     line: z.string().trim().min(4, "Enter house, road and other details"),
     isDefault: z.boolean().optional(),
   })
-  .refine((d) => DIVISIONS[d.division]?.includes(d.district), { message: "Choose a district", path: ["district"] });
+  .refine((d) => DIVISIONS[d.division]?.includes(d.district), { message: "Choose a district", path: ["district"] })
+  .refine((d) => THANAS[d.district]?.includes(d.area), { message: "Choose your thana / upazila", path: ["area"] });
 
 export type AddressInput = Omit<z.infer<typeof AddressSchema>, "isDefault">;
 

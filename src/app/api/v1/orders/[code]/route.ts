@@ -17,7 +17,8 @@ export async function GET(req: Request, ctx: RouteContext<"/api/v1/orders/[code]
     (user?.role === "admin" ||
       (data.order.user_id !== null && user?.id === data.order.user_id) ||
       (phone !== "" && digits(phone) === digits(data.order.phone)));
-  if (!data || !allowed) return Response.json({ error: "No order found with that ID and mobile number." }, { status: 404 });
+  if (!data || !allowed)
+    return Response.json({ error: "No order found with that ID and mobile number." }, { status: 404 });
   const { prescription_file, ...order } = data.order;
   // `events` (status timeline) is being added to getOrder(); default to none until it lands.
   const events = (data as { events?: unknown[] }).events ?? [];

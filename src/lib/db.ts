@@ -2,7 +2,7 @@ import "server-only";
 import path from "node:path";
 import fs from "node:fs";
 import Database from "better-sqlite3";
-import { APP_SCHEMA } from "./schema";
+import { migrate } from "./schema";
 
 const DB_PATH = process.env.DATABASE_PATH || path.join(process.cwd(), "data/medicare.db");
 
@@ -17,7 +17,7 @@ function open() {
   const db = new Database(/*turbopackIgnore: true*/ DB_PATH);
   db.pragma("journal_mode = WAL");
   db.pragma("foreign_keys = ON");
-  db.exec(APP_SCHEMA);
+  migrate(db);
   return db;
 }
 

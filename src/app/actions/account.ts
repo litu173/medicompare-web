@@ -5,8 +5,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { getOrder, setOrderStatus } from "@/lib/orders";
-import { ORDER_STATUSES } from "@/lib/bd";
+import { getOrder } from "@/lib/orders";
 
 export async function trackOrder(_prev: { error?: string } | undefined, form: FormData) {
   const code = String(form.get("code") ?? "")
@@ -36,13 +35,4 @@ export async function deleteAddress(form: FormData) {
   if (!user) return;
   db.prepare("DELETE FROM addresses WHERE id = ? AND user_id = ?").run(Number(form.get("id")), user.id);
   revalidatePath("/account");
-}
-
-export async function updateOrderStatus(form: FormData) {
-  const user = await getCurrentUser();
-  if (user?.role !== "admin") throw new Error("Forbidden");
-  const status = String(form.get("status"));
-  if (!(ORDER_STATUSES as readonly string[]).includes(status)) return;
-  setOrderStatus(String(form.get("code")), status);
-  revalidatePath("/admin");
 }

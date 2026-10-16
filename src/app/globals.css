@@ -3,9 +3,10 @@
 @theme inline {
   --color-brand-50: #ecfdf7;
   --color-brand-100: #d1fae9;
-  --color-brand-500: #10a37f;
-  --color-brand-600: #0b8a6b;
-  --color-brand-700: #0a6f57;
+  --color-brand-500: #0f9a77;
+  /* 600/700 keep at least 4.5:1 contrast with white text. */
+  --color-brand-600: #0a7c60;
+  --color-brand-700: #086450;
   --color-brand-900: #063d31;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -18,6 +19,34 @@
 body {
   background: #f5f7f6;
   color: #111827;
+}
+
+/* Tailwind v4 resets buttons to the default cursor; every clickable control shows the pointer. */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [role="radio"],
+  [role="tab"],
+  select:not(:disabled),
+  summary,
+  label:has(> input:not(:disabled)),
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled),
+  input[type="file"]:not(:disabled),
+  a[href] {
+    cursor: pointer;
+  }
+  button:disabled,
+  select:disabled,
+  input:disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+  /* Visible keyboard focus everywhere. */
+  :focus-visible {
+    outline: 2px solid var(--color-brand-600);
+    outline-offset: 2px;
+  }
 }
 
 /* Room for the fixed bottom navigation + iOS home indicator. */

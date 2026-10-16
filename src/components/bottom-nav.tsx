@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Search, ShoppingCart, User, Building2 } from "lucide-react";
+import { Home, Search, ShoppingCart, User, Package } from "lucide-react";
 import { useCart } from "./cart-context";
 
 export function BottomNav({ signedIn }: { signedIn: boolean }) {
@@ -11,7 +11,12 @@ export function BottomNav({ signedIn }: { signedIn: boolean }) {
   const tabs = [
     { href: "/", label: "Home", icon: Home, active: pathname === "/" },
     { href: "/search", label: "Search", icon: Search, active: pathname.startsWith("/search") },
-    { href: "/companies", label: "Companies", icon: Building2, active: pathname.startsWith("/compan") },
+    {
+      href: "/orders",
+      label: "Orders",
+      icon: Package,
+      active: ["/orders", "/order/", "/track"].some((p) => pathname.startsWith(p)),
+    },
     { href: "/cart", label: "Cart", icon: ShoppingCart, active: pathname === "/cart", badge: ready ? count : 0 },
     {
       href: signedIn ? "/account" : "/login",
@@ -34,7 +39,7 @@ export function BottomNav({ signedIn }: { signedIn: boolean }) {
             <Link
               href={t.href}
               className={`relative flex flex-col items-center gap-0.5 py-2 text-[11px] font-medium ${
-                t.active ? "text-brand-700" : "text-gray-500"
+                t.active ? "text-brand-700" : "text-gray-600"
               }`}
             >
               <t.icon className="size-5" strokeWidth={t.active ? 2.4 : 1.8} />

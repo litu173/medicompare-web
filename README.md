@@ -35,6 +35,39 @@ Create an admin (manages orders at `/admin`): set `ADMIN_EMAIL`/`ADMIN_PASSWORD`
 - **Orders**: confirmation page with status timeline, guest order tracking (`/track`, order ID + phone),
   account order history, admin order management (status updates, cancellations restore stock).
 
+## Admin portal (`/admin`)
+
+Only accounts whose email is in `ADMIN_EMAILS` can open it. Everyone else gets "not found", and search engines are told not to index it.
+
+- **Dashboard**: today's queue, step by step (New → To pack → Ready to ship → Out for delivery), sales, cash still to collect from riders, prescriptions to check, and low-stock alerts.
+- **Orders**: search by order ID, phone or name. Each order shows only the next step:
+  1. **Confirm**: call the customer and check the prescription.
+  2. **Pick & pack**: every item has its photo, name, strength, maker and quantity. It must be ticked before the order can be marked packed, so nothing is missed or mixed up.
+  3. **Ship**: the delivery person's name and phone are required. The customer sees them and can call.
+  4. **Delivered**: cash-on-delivery orders are marked paid.
+
+  Cancelling (with a reason) returns the stock. A printable packing slip has a tick box per line and the "COLLECT ৳" amount.
+- **Inventory**: filter for low stock, out of stock, in open orders, or no photo. Quick "+ qty" restock, plus received/removed/counted entries with a full stock history. Set alert levels, edit prices, and upload product photos.
+- **Customers** (registered and guest) and **Settings** (delivery fees, free-delivery threshold, help-line number).
+
+Customers follow their order on `/orders` and `/order/<id>`: a timeline with times, the rider's name and a call button. The page refreshes automatically.
+
+## Product photos
+
+Each product shows only its own photo. Until one is added, a neutral icon for the dosage form is shown, never a picture of a different product. No openly licensed photo set exists for Bangladeshi medicines, so photos come from your own shelf photos or from manufacturers' pack shots:
+
+- One at a time: Admin → Inventory → product → **Add photo** (phone camera works).
+- In bulk: name each file after the product ID shown in admin and in `/medicine/<id>` (e.g. `10452.jpg`), then run `npm run images:import -- /path/to/folder`.
+
+Photos are stored in `data/uploads/products`, which is not committed. Back this folder up together with `data/medicare.db`.
+
+## Android app
+
+`/app` has the download button and a QR code. The APK is built by GitHub Actions in
+[litu173/medicompare-mobile](https://github.com/litu173/medicompare-mobile) and published as the `latest-android` release.
+To use it with this server from a phone on the same Wi-Fi, run `npm run dev -- -H 0.0.0.0`, then set
+Account → Server address in the app to `<this computer's IP>:3000`.
+
 ## Data
 
 `data/raw/` contains the open-source *Bangladesh medicines* dataset (scraped from MedEx), via

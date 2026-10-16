@@ -2,10 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/components/cart-context";
-import { Header } from "@/components/header";
-import { BottomNav } from "@/components/bottom-nav";
 import { Toast } from "@/components/toast";
-import { getCurrentUser } from "@/lib/auth";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -20,18 +17,15 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#0b8a6b",
+  themeColor: "#0a7c60",
 };
 
-export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const user = await getCurrentUser();
+export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
       <body className="min-h-dvh font-sans">
         <CartProvider>
-          <Header user={user ? { name: user.name, role: user.role } : null} />
-          <main className="mx-auto w-full max-w-3xl px-4 pb-safe">{children}</main>
-          <BottomNav signedIn={!!user} />
+          {children}
           <Toast />
         </CartProvider>
       </body>
