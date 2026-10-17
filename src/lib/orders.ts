@@ -21,7 +21,17 @@ export type QuoteLine = {
   maxQty: number;
   image: string | null;
   /** Cheapest in-stock equivalent brand, if it is cheaper than this one. */
-  cheaper: { medicineId: number; brandName: string; manufacturer: string; savePct: number } | null;
+  cheaper: {
+    medicineId: number;
+    brandName: string;
+    manufacturer: string;
+    savePct: number;
+    /** The cheaper brand's default pack, so apps can switch in one tap. */
+    packId: number | null;
+    packLabel: string | null;
+    price: number | null;
+    unitsPerPack: number | null;
+  } | null;
 };
 
 /** Re-prices a cart from the database. Client-side prices are never trusted. */
@@ -33,8 +43,10 @@ export function quote(lines: CartLine[], district?: string) {
   }
   const rows = getPacksByIds([...merged.keys()]);
   const cheaperStmt = db.prepare(
-    `SELECT c.id, c.brand_name, f.name AS manufacturer, c.compare_price, m.compare_price AS own
+    `SELECT c.id, c.brand_name, f.name AS manufacturer, c.compare_price, m.compare_price AS own,
+            cp.id AS pack_id, cp.label AS pack_label, cp.price AS pack_price, cp.qty AS pack_qty
      FROM medicines m JOIN medicines c ON c.equiv_key = m.equiv_key AND c.id != m.id
+     LEFT JOIN packs cp ON cp.medicine_id = c.id AND cp.sort = 0
      JOIN manufacturers f ON f.id = c.manufacturer_id
      JOIN inventory inv ON inv.medicine_id = c.id
      WHERE m.id = ? AND inv.stock > 0 AND c.price_suspect = 0 AND c.compare_price < m.compare_price
@@ -42,7 +54,18 @@ export function quote(lines: CartLine[], district?: string) {
   );
   const items: QuoteLine[] = rows.map((r) => {
     const c = cheaperStmt.get(r.medicine_id) as
-      { id: number; brand_name: string; manufacturer: string; compare_price: number; own: number } | undefined;
+      | {
+          id: number;
+          brand_name: string;
+          manufacturer: string;
+          compare_price: number;
+          own: number;
+          pack_id: number | null;
+          pack_label: string | null;
+          pack_price: number | null;
+          pack_qty: number | null;
+        }
+      | undefined;
     const qty = merged.get(r.pack_id)!;
     const maxQty = Math.floor(r.stock / r.qty);
     return {
@@ -64,6 +87,10 @@ export function quote(lines: CartLine[], district?: string) {
             brandName: c.brand_name,
             manufacturer: c.manufacturer,
             savePct: Math.round(((c.own - c.compare_price) / c.own) * 100),
+            packId: c.pack_id,
+            packLabel: c.pack_label,
+            price: c.pack_price,
+            unitsPerPack: c.pack_qty,
           }
         : null,
     };
