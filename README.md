@@ -1,4 +1,6 @@
-# MediCompare BD
+# সাশ্রয় · Sashroy
+
+_"Sashroy" (সাশ্রয়) means "saving" in Bangla. Formerly MediCompare BD._
 
 Mobile-first web store that shows every equivalent medicine brand sold in Bangladesh, **cheapest first**.
 Search by brand (e.g. *Napa*) or generic/chemical name (e.g. *Paracetamol*). Every result expands to its full

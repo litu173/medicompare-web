@@ -35,7 +35,9 @@ export default async function AppPage() {
           <Smartphone className="size-6" />
         </span>
         <div>
-          <h1 className="text-2xl font-bold">MediCompare for Android</h1>
+          <h1 className="text-2xl font-bold">
+            <span className="font-bangla">সাশ্রয়</span> Sashroy for Android
+          </h1>
           <p className="text-sm text-gray-700">Test build · iPhone version coming soon</p>
         </div>
       </div>

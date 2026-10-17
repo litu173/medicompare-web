@@ -17,6 +17,7 @@ export default function Home() {
         <h1 className="text-[26px] font-bold leading-tight tracking-tight text-gray-900 sm:text-3xl">
           Same medicine. <span className="text-brand-600">Lower price.</span>
         </h1>
+        <p className="font-bangla mt-1 text-lg font-medium text-brand-700">একই ওষুধ, সাশ্রয়ী দামে</p>
         <p className="mt-2 text-[15px] text-gray-600">
           Search by brand or chemical (generic) name and see every equivalent brand sold in Bangladesh — cheapest first.
         </p>

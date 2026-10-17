@@ -24,7 +24,7 @@ export function AdminNav({ pending, userName }: { pending: number; userName: str
           <span className="grid size-8 place-items-center rounded-lg bg-brand-600 text-white">
             <Pill className="size-4.5" />
           </span>
-          MediCompare Admin
+          <span className="font-bangla text-lg">সাশ্রয়</span> Admin
         </Link>
         <nav className="flex-1 space-y-1 px-3">
           {LINKS.map((l) => (

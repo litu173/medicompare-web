@@ -14,7 +14,7 @@ const DEFAULTS: StoreSettings = {
   deliveryInsideDhaka: DELIVERY.insideDhaka,
   deliveryOutsideDhaka: DELIVERY.outsideDhaka,
   freeDeliveryOver: DELIVERY.freeOver,
-  storeName: "MediCompare BD",
+  storeName: "সাশ্রয় Sashroy",
   supportPhone: "",
 };
 

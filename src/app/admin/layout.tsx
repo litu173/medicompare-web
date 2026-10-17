@@ -5,7 +5,7 @@ import { orderCounts } from "@/lib/orders";
 import { AdminNav } from "@/components/admin/admin-nav";
 
 export const metadata: Metadata = {
-  title: { default: "Admin", template: "%s · Admin · MediCompare" },
+  title: { default: "Admin", template: "%s · Admin · Sashroy" },
   robots: { index: false, follow: false },
 };
 

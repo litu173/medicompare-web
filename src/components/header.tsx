@@ -19,7 +19,10 @@ export function Header({ user }: { user: { name: string; role: string } | null }
           <span className="grid size-8 place-items-center rounded-lg bg-brand-600 text-white">
             <Pill className="size-4.5" />
           </span>
-          <span className={showSearch ? "hidden sm:inline" : ""}>MediCompare</span>
+          <span className={`items-baseline gap-1.5 ${showSearch ? "hidden sm:flex" : "flex"}`}>
+            <span className="font-bangla text-xl font-bold leading-none">সাশ্রয়</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-gray-600">Sashroy</span>
+          </span>
         </Link>
         {showSearch && (
           <div className="min-w-0 flex-1">
