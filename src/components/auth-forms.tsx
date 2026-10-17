@@ -76,7 +76,7 @@ export function LoginForm({ next }: { next: string }) {
       </Field>
       <button
         disabled={pending}
-        className="h-12 w-full rounded-xl bg-brand-600 font-semibold text-white disabled:opacity-60"
+        className="h-12 w-full rounded-2xl bg-brand-600 font-semibold text-white disabled:opacity-60"
       >
         {pending ? "Signing in…" : "Sign in"}
       </button>
@@ -132,7 +132,7 @@ export function RegisterForm({ next }: { next: string }) {
       </Field>
       <button
         disabled={pending}
-        className="h-12 w-full rounded-xl bg-brand-600 font-semibold text-white disabled:opacity-60"
+        className="h-12 w-full rounded-2xl bg-brand-600 font-semibold text-white disabled:opacity-60"
       >
         {pending ? "Creating account…" : "Create account"}
       </button>

@@ -62,7 +62,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
             <Link
               key={g.id}
               href={`/generic/${g.slug}`}
-              className="flex shrink-0 snap-start items-center gap-1.5 rounded-lg bg-brand-50 px-3 py-2 text-sm font-semibold text-brand-700 ring-1 ring-brand-100 hover:ring-brand-600"
+              className="flex shrink-0 snap-start items-center gap-1.5 rounded-full border border-brand-100 bg-brand-50 px-3.5 py-2 text-sm font-bold text-brand-700 hover:border-brand-600"
             >
               <FlaskConical className="size-4" />
               {g.name}
@@ -86,7 +86,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
       )}
 
       {groups.length === 0 ? (
-        <div className="rounded-xl bg-white p-8 text-center shadow-sm ring-1 ring-black/5">
+        <div className="rounded-[22px] bg-white p-8 text-center shadow-card">
           <SearchX className="mx-auto size-8 text-gray-500" />
           <p className="mt-3 font-semibold">No medicines found for “{q}”</p>
           <p className="mt-1 text-sm text-gray-600">
@@ -115,13 +115,13 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
               ? `/generic/${g.genericSlug}?v=${encodeURIComponent(g.equivKey)}`
               : `/medicine/${g.items[0].id}`;
             return (
-              <section key={g.equivKey} className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/5">
+              <section key={g.equivKey} className="overflow-hidden rounded-[22px] bg-white shadow-card">
                 {hero ? (
                   <SearchedHero m={hero} items={g.items} />
                 ) : (
                   <div className="flex items-start justify-between gap-2 border-b border-gray-100 px-4 py-3">
                     <div className="min-w-0">
-                      <h2 className="text-lg font-bold leading-snug text-gray-900">
+                      <h2 className="font-display text-[21px] font-semibold leading-snug text-gray-900">
                         {g.genericName}{" "}
                         {g.strength && <span className="font-semibold text-gray-700">{g.strength}</span>}
                       </h2>
@@ -146,7 +146,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
                 {visible.length > 0 && (
                   <>
                     {hero && (
-                      <h3 className="bg-gray-50 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-700">
+                      <h3 className="eyebrow bg-ivory px-5 py-2.5 !text-gray-600">
                         Same medicine from other companies · cheapest first
                       </h3>
                     )}
@@ -193,20 +193,21 @@ function SearchedHero({ m, items }: { m: Med; items: Med[] }) {
   const best = cheaper.find((i) => i.stock > 0) ?? cheaper[0];
   const out = m.stock <= 0;
   return (
-    <div className="border-b border-gray-100 p-4">
-      <div className="flex items-start gap-3">
+    <div className="border-b border-line p-5">
+      <p className="eyebrow mb-3">You searched</p>
+      <div className="flex items-start gap-3.5">
         <Link href={`/medicine/${m.id}`} className="flex min-w-0 flex-1 items-start gap-3">
           <MedicineThumb image={m.image} form={m.dosage_form} alt={`${m.brand_name} ${m.strength ?? ""}`} size="md" />
           <div className="min-w-0">
-            <h2 className="text-xl font-bold leading-tight text-gray-900">
-              {m.brand_name} <span className="font-semibold text-gray-700">{m.strength}</span>
+            <h2 className="font-display text-[26px] font-semibold leading-tight text-gray-900">
+              {m.brand_name} <span className="font-sans text-[15px] font-bold text-gray-600">{m.strength}</span>
             </h2>
             <p className="mt-0.5 text-sm text-gray-700">
               {m.dosage_form} · {m.generic_name}
             </p>
             <p className="text-sm text-gray-600">{m.manufacturer_name}</p>
             <p className="mt-1">
-              <span className="text-lg font-bold tabular-nums">{taka(m.compare_price)}</span>
+              <span className="font-display text-[22px] font-semibold tabular-nums">{taka(m.compare_price)}</span>
               <span className="text-sm text-gray-600">{perUnit(m.compare_unit)}</span>
               {out && <span className="ml-2 text-sm font-semibold text-red-700">Out of stock</span>}
             </p>
@@ -225,15 +226,17 @@ function SearchedHero({ m, items }: { m: Med; items: Med[] }) {
         )}
       </div>
       {best && m.compare_price && best.compare_price ? (
-        <p className="mt-3 flex items-center gap-2 rounded-lg bg-brand-50 px-3 py-2 text-sm text-brand-900">
-          <TrendingDown className="size-4 shrink-0 text-brand-700" />
+        <p className="bg-hero mt-4 flex items-center gap-3 rounded-[18px] px-4 py-3.5 text-sm text-white">
+          <TrendingDown className="size-6 shrink-0 text-mint" />
           <span>
-            <b>{cheaper.length}</b> cheaper equivalent{cheaper.length > 1 ? "s" : ""} — save up to{" "}
-            <b>{savingsPct(best.compare_price, m.compare_price)}%</b>
+            {cheaper.length} cheaper equal{cheaper.length > 1 ? "s" : ""} below.{" "}
+            <b className="text-gold-2">Save up to {savingsPct(best.compare_price, m.compare_price)}%</b>
           </span>
         </p>
       ) : items.length > 1 ? (
-        <p className="mt-3 rounded-lg bg-gray-50 px-3 py-2 text-sm text-gray-700">This is already the lowest price.</p>
+        <p className="mt-3 inline-block rounded-full bg-brand-100 px-3 py-1 text-xs font-bold text-brand-700">
+          This is already the lowest price
+        </p>
       ) : null}
     </div>
   );

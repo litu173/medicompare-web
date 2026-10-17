@@ -54,11 +54,9 @@ export default async function CustomersPage({ searchParams }: PageProps<"/admin/
         <button className="rounded-lg bg-gray-900 px-4 font-semibold text-white hover:bg-gray-800">Search</button>
       </form>
       {rows.length === 0 ? (
-        <p className="rounded-2xl bg-white p-6 text-center text-sm text-gray-700 shadow-sm ring-1 ring-black/5">
-          No customers yet.
-        </p>
+        <p className="rounded-[22px] bg-white p-6 text-center text-sm text-gray-700 shadow-card">No customers yet.</p>
       ) : (
-        <ul className="divide-y divide-gray-100 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/5">
+        <ul className="divide-y divide-gray-100 overflow-hidden rounded-[22px] bg-white shadow-card">
           {rows.map((c) => (
             <li key={c.key} className="flex items-center gap-3 px-4 py-3">
               <span className="grid size-10 shrink-0 place-items-center rounded-full bg-brand-50 font-bold text-brand-700">

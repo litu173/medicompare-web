@@ -20,7 +20,7 @@ export function Monograph({ generic }: { generic: Generic }) {
   const sections = SECTIONS.filter(([k]) => generic[k]);
   if (!sections.length) return null;
   return (
-    <div className="divide-y divide-gray-100 overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-black/5">
+    <div className="divide-y divide-gray-100 overflow-hidden rounded-[22px] bg-white shadow-card">
       {sections.map(([key, title], i) => (
         <details key={key} open={i === 0} className="group">
           <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-semibold [&::-webkit-details-marker]:hidden">

@@ -31,7 +31,7 @@ export function MedicineThumb({
   alt: string;
   size?: keyof typeof SIZES;
 }) {
-  const box = `${SIZES[size]} shrink-0 overflow-hidden rounded-xl border border-gray-200 bg-white`;
+  const box = `${SIZES[size]} shrink-0 overflow-hidden ${size === "lg" ? "rounded-[26px]" : "rounded-2xl"} bg-white`;
   if (image) {
     return (
       <span className={box}>
@@ -41,9 +41,13 @@ export function MedicineThumb({
     );
   }
   return (
-    <span className={`${box} grid place-items-center bg-gray-50`} role="img" aria-label={`${alt} (no photo yet)`}>
+    <span
+      className={`${box} grid place-items-center bg-gradient-to-br from-brand-50 to-[#f4efe3]`}
+      role="img"
+      aria-label={`${alt} (no photo yet)`}
+    >
       {createElement(iconFor(form ?? ""), {
-        className: size === "lg" ? "size-10 text-gray-500" : "size-6 text-gray-500",
+        className: size === "lg" ? "size-11 text-brand-600" : "size-6 text-brand-600",
         strokeWidth: 1.5,
       })}
     </span>

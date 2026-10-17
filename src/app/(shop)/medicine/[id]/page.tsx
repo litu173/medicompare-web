@@ -53,7 +53,7 @@ export default async function MedicinePage({ params }: PageProps<"/medicine/[id]
         )}
       </nav>
 
-      <section className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5">
+      <section className="rounded-[22px] bg-white p-4 shadow-card">
         <div className="flex items-start gap-4">
           <MedicineThumb
             image={m.image}
@@ -63,8 +63,9 @@ export default async function MedicinePage({ params }: PageProps<"/medicine/[id]
           />
           <div className="min-w-0 flex-1">
             <p className="text-xs font-medium uppercase tracking-wide text-gray-600">{m.dosage_form}</p>
-            <h1 className="text-2xl font-bold leading-tight text-gray-900">
-              {m.brand_name} <span className="font-medium text-gray-600">{m.strength}</span>
+            <h1 className="font-display text-[30px] font-semibold leading-tight text-gray-900">
+              {m.brand_name}
+              <span className="block font-sans text-base font-bold text-gray-600">{m.strength}</span>
             </h1>
             {m.type === "herbal" && (
               <span className="mt-1 inline-block rounded bg-lime-100 px-2 py-0.5 text-xs font-semibold text-lime-800">
@@ -94,7 +95,7 @@ export default async function MedicinePage({ params }: PageProps<"/medicine/[id]
         </div>
 
         <div className="mt-4 flex items-baseline gap-2 border-t border-gray-100 pt-4">
-          <span className="text-2xl font-bold tabular-nums">{taka(m.compare_price)}</span>
+          <span className="font-display text-[32px] font-semibold tabular-nums">{taka(m.compare_price)}</span>
           <span className="text-sm text-gray-600">{perUnit(m.compare_unit)}</span>
           {equivalents.length > 1 && m.compare_price !== null && (
             <span
@@ -120,10 +121,13 @@ export default async function MedicinePage({ params }: PageProps<"/medicine/[id]
       </section>
 
       {cheaper.length > 0 && cheapest && maxSave > 0 && (
-        <a href="#alternatives" className="flex items-center gap-3 rounded-xl bg-brand-600 p-4 text-white">
+        <a
+          href="#alternatives"
+          className="bg-hero flex items-center gap-4 rounded-[24px] border border-gold/25 p-5 text-white shadow-lux"
+        >
           <TrendingDown className="size-6 shrink-0" />
           <div className="text-sm">
-            <p className="font-semibold">
+            <p className="font-display text-lg text-gold-2">
               {cheaper.length} cheaper equivalent{cheaper.length > 1 ? "s" : ""} — save up to {maxSave}%
             </p>
             <p className="text-white/80">
@@ -145,15 +149,15 @@ export default async function MedicinePage({ params }: PageProps<"/medicine/[id]
 
       <section id="alternatives" className="scroll-mt-20">
         <div className="mb-2 flex items-end justify-between">
-          <h2 className="text-lg font-semibold">Equivalent brands</h2>
+          <h2 className="font-display text-2xl font-semibold">Equivalent brands</h2>
           <span className="text-xs text-gray-600">{equivalents.length} total · cheapest first</span>
         </div>
         {alternatives.length === 0 ? (
-          <p className="rounded-xl bg-white p-4 text-sm text-gray-600 shadow-sm ring-1 ring-black/5">
+          <p className="rounded-[22px] bg-white p-4 text-sm text-gray-600 shadow-card">
             No other brand with exactly the same generic, strength and form is listed.
           </p>
         ) : (
-          <div className="divide-y divide-gray-100 overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-black/5">
+          <div className="divide-y divide-gray-100 overflow-hidden rounded-[22px] bg-white shadow-card">
             {equivalents.map((e, i) => (
               <MedicineRow
                 key={e.id}
@@ -172,13 +176,13 @@ export default async function MedicinePage({ params }: PageProps<"/medicine/[id]
 
       {variants.length > 0 && (
         <section>
-          <h2 className="mb-2 text-lg font-semibold">Other strengths & forms</h2>
+          <h2 className="mb-2 font-display text-2xl font-semibold">Other strengths & forms</h2>
           <ScrollRow label="Other strengths and forms">
             {variants.map((v) => (
               <Link
                 key={v.equiv_key}
                 href={`/medicine/${v.any_id}`}
-                className="shrink-0 snap-start rounded-xl bg-white px-3 py-2 text-sm shadow-sm ring-1 ring-black/5 hover:ring-brand-600"
+                className="shrink-0 snap-start rounded-[22px] bg-white px-3 py-2 text-sm shadow-card hover:ring-brand-600"
               >
                 <p className="font-medium">{v.strength ?? "—"}</p>
                 <p className="text-xs text-gray-600">
@@ -197,7 +201,7 @@ export default async function MedicinePage({ params }: PageProps<"/medicine/[id]
 
       {generic && (
         <section>
-          <h2 className="mb-2 text-lg font-semibold">About {generic.name}</h2>
+          <h2 className="mb-2 font-display text-2xl font-semibold">About {generic.name}</h2>
           {generic.drug_class && <p className="mb-2 text-sm text-gray-600">Class: {generic.drug_class}</p>}
           <Monograph generic={generic} />
         </section>

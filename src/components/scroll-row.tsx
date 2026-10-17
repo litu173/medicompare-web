@@ -55,7 +55,7 @@ export function ScrollRow({ children, label }: { children: React.ReactNode; labe
       </div>
       {edges.left && (
         <>
-          <span className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-[#f5f7f6] to-transparent" />
+          <span className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-ivory to-transparent" />
           <button type="button" aria-label="Scroll left" onClick={() => scrollBy(-1)} className={`${arrow} left-1`}>
             <ChevronLeft className="size-4" />
           </button>
@@ -63,7 +63,7 @@ export function ScrollRow({ children, label }: { children: React.ReactNode; labe
       )}
       {edges.right && (
         <>
-          <span className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-[#f5f7f6] to-transparent" />
+          <span className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-ivory to-transparent" />
           <button type="button" aria-label="Scroll right" onClick={() => scrollBy(1)} className={`${arrow} right-1`}>
             <ChevronRight className="size-4" />
           </button>

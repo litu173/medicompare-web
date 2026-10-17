@@ -79,7 +79,7 @@ export function CheckoutForm({
 
   const fee = quote?.deliveryFee ?? 0;
   const subtotal = quote?.subtotal ?? items.reduce((s, i) => s + i.qty * i.price, 0);
-  const sectionCls = "space-y-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5";
+  const sectionCls = "space-y-3 rounded-[22px] bg-white p-4 shadow-card";
 
   return (
     <form action={action} className="space-y-4 pb-28 pt-4">
@@ -87,7 +87,7 @@ export function CheckoutForm({
         <Link href="/cart" aria-label="Back to cart" className="-ml-1 rounded-lg p-1">
           <ArrowLeft className="size-5" />
         </Link>
-        <h1 className="text-2xl font-bold">Checkout</h1>
+        <h1 className="font-display text-3xl font-semibold">Checkout</h1>
       </div>
 
       <input type="hidden" name="cart" value={JSON.stringify(items.map((i) => ({ packId: i.packId, qty: i.qty })))} />
@@ -357,7 +357,7 @@ export function CheckoutForm({
           )}
           <button
             disabled={pending || (quote ? !quote.allAvailable : false)}
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand-600 font-semibold text-white disabled:opacity-60"
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-brand-600 font-semibold text-white disabled:opacity-60"
           >
             <Lock className="size-4" />
             {pending ? "Placing order…" : `Place order · ${taka(subtotal + fee)}`}

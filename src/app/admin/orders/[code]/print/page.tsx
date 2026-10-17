@@ -19,7 +19,7 @@ export default async function PrintSlip({ params }: PageProps<"/admin/orders/[co
   const cod = o.payment_method === "cod" && o.payment_status !== "paid";
 
   return (
-    <div className="mx-auto max-w-2xl space-y-4 bg-white p-6 text-gray-900 shadow-sm ring-1 ring-black/5 print:max-w-none print:shadow-none print:ring-0">
+    <div className="mx-auto max-w-2xl space-y-4 bg-white p-6 text-gray-900 shadow-card print:max-w-none print:shadow-none print:ring-0">
       <div className="flex items-center justify-between print:hidden">
         <Link href={`/admin/orders/${o.code}`} className="text-sm font-semibold text-brand-700">
           ← Back to order

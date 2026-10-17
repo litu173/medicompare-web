@@ -105,7 +105,7 @@ export default function AdminDashboard() {
       </section>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <section className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5">
+        <section className="rounded-[22px] bg-white p-4 shadow-card">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="font-semibold">Recent orders</h2>
             <Link href="/admin/orders" className="flex items-center gap-1 text-sm font-semibold text-brand-700">
@@ -134,7 +134,7 @@ export default function AdminDashboard() {
           )}
         </section>
 
-        <section className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5">
+        <section className="rounded-[22px] bg-white p-4 shadow-card">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="flex items-center gap-2 font-semibold">
               <AlertTriangle className="size-4 text-amber-700" /> Running low
@@ -197,7 +197,7 @@ function Stat({
       <p className="text-xs text-gray-600">{sub}</p>
     </>
   );
-  const cls = "block rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5";
+  const cls = "block rounded-[22px] bg-white p-4 shadow-card";
   return href ? (
     <Link href={href} className={`${cls} hover:ring-brand-600`}>
       {body}

@@ -35,14 +35,14 @@ export default async function AppPage() {
           <Smartphone className="size-6" />
         </span>
         <div>
-          <h1 className="text-2xl font-bold">
+          <h1 className="font-display text-3xl font-semibold">
             <span className="font-bangla">সাশ্রয়</span> Sashroy for Android
           </h1>
           <p className="text-sm text-gray-700">Test build · iPhone version coming soon</p>
         </div>
       </div>
 
-      <section className="flex flex-col items-center gap-4 rounded-2xl bg-white p-5 text-center shadow-sm ring-1 ring-black/5 sm:flex-row sm:text-left">
+      <section className="flex flex-col items-center gap-4 rounded-[22px] bg-white p-5 text-center shadow-card sm:flex-row sm:text-left">
         <div
           className="hidden shrink-0 rounded-xl border border-gray-200 p-2 sm:block"
           dangerouslySetInnerHTML={{ __html: qr }}
@@ -50,7 +50,7 @@ export default async function AppPage() {
         <div className="space-y-3">
           <a
             href={APK_URL}
-            className="inline-flex h-12 items-center gap-2 rounded-xl bg-brand-600 px-5 font-semibold text-white hover:bg-brand-700"
+            className="inline-flex h-12 items-center gap-2 rounded-2xl bg-brand-600 px-5 font-semibold text-white hover:bg-brand-700"
           >
             <Download className="size-5" /> Download for Android (.apk)
           </a>
@@ -62,7 +62,7 @@ export default async function AppPage() {
 
       <ol className="space-y-3">
         {steps.map((s, i) => (
-          <li key={s.t} className="flex gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5">
+          <li key={s.t} className="flex gap-3 rounded-[22px] bg-white p-4 shadow-card">
             <span className="grid size-8 shrink-0 place-items-center rounded-full bg-brand-50 font-bold text-brand-700">
               {i + 1}
             </span>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Minus, Plus, ShoppingCart } from "lucide-react";
+import { Ban, Minus, Plus } from "lucide-react";
 import { useCart } from "./cart-context";
 
 /**
@@ -23,12 +23,12 @@ export function CartControl(props: {
 
   if (inCart) {
     return (
-      <div className="flex h-10 shrink-0 items-center rounded-lg border border-brand-600 bg-brand-50 text-brand-700">
+      <div className="flex h-10 shrink-0 items-center rounded-full border border-brand-100 bg-brand-50 text-brand-700">
         <button
           type="button"
           aria-label={`Remove ${step} ${brandName}`}
           onClick={() => setQty(packId, inCart.qty - step)}
-          className="grid h-full w-9 place-items-center rounded-l-lg hover:bg-brand-100"
+          className="grid h-full w-9 place-items-center rounded-l-full hover:bg-brand-100"
         >
           <Minus className="size-4" />
         </button>
@@ -39,7 +39,7 @@ export function CartControl(props: {
           type="button"
           aria-label={`Add ${step} more ${brandName}`}
           onClick={() => setQty(packId, inCart.qty + step)}
-          className="grid h-full w-9 place-items-center rounded-r-lg hover:bg-brand-100"
+          className="grid h-full w-9 place-items-center rounded-r-full hover:bg-brand-100"
         >
           <Plus className="size-4" />
         </button>
@@ -53,10 +53,9 @@ export function CartControl(props: {
       disabled={props.disabled}
       onClick={() => add({ packId, medicineId, brandName, description, packLabel, price }, step)}
       aria-label={`Add ${brandName} to cart`}
-      className="flex h-10 shrink-0 items-center gap-1.5 rounded-lg bg-brand-600 px-3 text-sm font-semibold text-white hover:bg-brand-700 disabled:bg-gray-200 disabled:text-gray-600"
+      className="grid size-10 shrink-0 place-items-center rounded-full bg-brand-600 text-white shadow-card hover:bg-brand-700 disabled:bg-gray-200 disabled:text-gray-600 disabled:shadow-none"
     >
-      <ShoppingCart className="size-4" />
-      {props.disabled ? "Sold out" : "Add"}
+      {props.disabled ? <Ban className="size-4" /> : <Plus className="size-5" strokeWidth={2.5} />}
     </button>
   );
 }

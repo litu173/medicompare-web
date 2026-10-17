@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Bike, CheckCircle2, Phone } from "lucide-react";
+import { Bike, Phone, PiggyBank } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { canViewOrder } from "@/lib/access";
 import { getOrder } from "@/lib/orders";
+import { savingsFor } from "@/lib/savings";
 import { PAYMENT_METHODS } from "@/lib/bd";
 import { taka } from "@/lib/format";
 import { StatusBadge, StatusTracker, fmtTime } from "@/components/order-status";
@@ -20,22 +21,43 @@ export default async function OrderPage({ params, searchParams }: PageProps<"/or
   const user = await getCurrentUser();
   if (!data || !(await canViewOrder(data.order, user))) notFound();
   const { order, items, events } = data;
+  const saved = savingsFor([order.id]).byOrder[order.code] ?? 0;
   const active = !["delivered", "cancelled"].includes(order.status);
 
   return (
     <div className="space-y-4 pt-4">
       {active && <AutoRefresh seconds={30} />}
       {placed && (
-        <div className="rounded-2xl bg-brand-600 p-5 text-center text-white">
-          <CheckCircle2 className="mx-auto size-10" />
-          <h1 className="mt-2 text-xl font-bold">Order placed!</h1>
-          <p className="mt-1 text-sm text-white/90">
-            We&apos;ll call {order.phone} to confirm. Your order ID is <b>{order.code}</b>. Use it to track the order.
+        <div className="rounded-[22px] bg-brand-50 p-6 text-center">
+          {/* eslint-disable-next-line @next/next/no-img-element -- static SVG illustration */}
+          <img
+            src="/illustrations/order_success.svg"
+            alt="Happy customer with the parcel"
+            className="mx-auto h-40 w-auto"
+          />
+          <p lang="bn" className="mt-2 font-bangla text-brand-700">
+            ধন্যবাদ! Thank you
+          </p>
+          <h1 className="font-display text-3xl font-semibold">Order placed</h1>
+          <p className="mt-1 text-sm text-gray-700">
+            We&apos;ll call {order.phone} to confirm. Your order ID is <b>{order.code}</b>.
           </p>
         </div>
       )}
+      {saved >= 1 && (
+        <div className="bg-hero flex items-center gap-4 rounded-[24px] border border-gold/25 p-5 text-white shadow-lux">
+          <span className="bg-gold-grad grid size-12 shrink-0 place-items-center rounded-full text-night">
+            <PiggyBank className="size-6" />
+          </span>
+          <div className="flex-1">
+            <p className="eyebrow !text-gold-2">You saved</p>
+            <p className="font-display text-3xl">{taka(saved)}</p>
+            <p className="text-xs text-white/70">vs the typical price of the same medicines</p>
+          </div>
+        </div>
+      )}
 
-      <section className="space-y-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5">
+      <section className="space-y-4 rounded-[22px] bg-white p-4 shadow-card">
         <div className="flex items-start justify-between gap-2">
           <div>
             <p className="text-xs font-medium uppercase tracking-wide text-gray-600">Order</p>
@@ -70,7 +92,7 @@ export default async function OrderPage({ params, searchParams }: PageProps<"/or
         {active && <p className="text-xs text-gray-600">This page updates automatically.</p>}
       </section>
 
-      <section className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5">
+      <section className="rounded-[22px] bg-white p-4 shadow-card">
         <h2 className="mb-3 font-semibold">Items ({items.length})</h2>
         <ul className="space-y-3 text-sm">
           {items.map((i) => (
@@ -106,7 +128,7 @@ export default async function OrderPage({ params, searchParams }: PageProps<"/or
       </section>
 
       <section className="grid gap-3 sm:grid-cols-2">
-        <div className="rounded-2xl bg-white p-4 text-sm shadow-sm ring-1 ring-black/5">
+        <div className="rounded-[22px] bg-white p-4 text-sm shadow-card">
           <h2 className="mb-1 font-semibold">Delivery to</h2>
           <p>
             {order.name} · {order.phone}
@@ -116,7 +138,7 @@ export default async function OrderPage({ params, searchParams }: PageProps<"/or
           </p>
           {order.note && <p className="mt-1 text-gray-700">Note: {order.note}</p>}
         </div>
-        <div className="rounded-2xl bg-white p-4 text-sm shadow-sm ring-1 ring-black/5">
+        <div className="rounded-[22px] bg-white p-4 text-sm shadow-card">
           <h2 className="mb-1 font-semibold">Payment</h2>
           <p>{PAYMENT_METHODS.find((p) => p.id === order.payment_method)?.label ?? order.payment_method}</p>
           <p className="capitalize text-gray-700">{order.payment_status}</p>
@@ -125,7 +147,7 @@ export default async function OrderPage({ params, searchParams }: PageProps<"/or
       </section>
 
       {!user && (
-        <p className="rounded-xl bg-white p-4 text-center text-sm text-gray-700 shadow-sm ring-1 ring-black/5">
+        <p className="rounded-[22px] bg-white p-4 text-center text-sm text-gray-700 shadow-card">
           Want to track all your orders in one place?{" "}
           <Link href="/register" className="font-semibold text-brand-700">
             Create an account

@@ -21,7 +21,7 @@ export default async function AdminOrder({ params }: PageProps<"/admin/orders/[c
   const packedCount = items.filter((i) => i.packed).length;
   const allPacked = packedCount === items.length;
   const canCancel = NEXT_STATUS[o.status]?.includes("cancelled");
-  const card = "rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5";
+  const card = "rounded-[22px] bg-white p-4 shadow-card";
 
   return (
     <div className="space-y-4">

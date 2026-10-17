@@ -23,11 +23,11 @@ export default async function GenericPage({ params, searchParams }: PageProps<"/
 
   return (
     <div className="space-y-5 pt-4">
-      <section>
-        <p className="text-xs font-medium uppercase tracking-wide text-gray-600">Generic / chemical name</p>
-        <h1 className="text-2xl font-bold text-gray-900">{generic.name}</h1>
-        {generic.drug_class && <p className="text-sm text-gray-600">{generic.drug_class}</p>}
-        <p className="mt-1 text-sm text-gray-600">
+      <section className="bg-hero rounded-[24px] border border-gold/25 p-6 text-white shadow-lux">
+        <p className="eyebrow !text-gold-2">Generic · chemical name</p>
+        <h1 className="mt-2 font-display text-3xl">{generic.name}</h1>
+        {generic.drug_class && <p className="mt-1 text-sm text-white/70">{generic.drug_class}</p>}
+        <p className="mt-3 text-sm font-bold text-mint">
           {generic.brand_count} brands in {all.length} strength/form combination{all.length > 1 ? "s" : ""}
         </p>
       </section>
@@ -54,10 +54,7 @@ export default async function GenericPage({ params, searchParams }: PageProps<"/
         const min = priced[0]?.compare_price ?? null;
         const max = priced.at(-1)?.compare_price ?? null;
         return (
-          <section
-            key={items[0].equiv_key}
-            className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-black/5"
-          >
+          <section key={items[0].equiv_key} className="overflow-hidden rounded-[22px] bg-white shadow-card">
             <div className="flex items-start justify-between gap-2 border-b border-gray-100 px-3 py-3">
               <div>
                 <h2 className="font-semibold">

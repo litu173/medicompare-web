@@ -53,3 +53,23 @@ export function orderIdsFor(userId: number | null, guest: { code: string; phone:
   }
   return [...ids];
 }
+
+/** Savings for whoever is browsing: their account orders plus guest orders remembered in this browser. */
+export async function savingsForVisitor() {
+  const { cookies } = await import("next/headers");
+  const { getCurrentUser } = await import("./auth");
+  const user = await getCurrentUser();
+  const jar = await cookies();
+  const codes = [
+    ...(jar.get("mc_guest_orders")?.value ?? "").split(","),
+    ...(jar.get("mc_tracked")?.value ?? "").split(","),
+  ].filter(Boolean);
+  const ids = new Set(orderIdsFor(user?.id ?? null, []));
+  if (codes.length) {
+    const rows = db
+      .prepare(`SELECT id FROM orders WHERE code IN (${codes.map(() => "?").join(",")})`)
+      .all(...codes) as { id: number }[];
+    for (const r of rows) ids.add(r.id);
+  }
+  return savingsFor([...ids]);
+}

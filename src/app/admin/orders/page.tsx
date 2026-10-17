@@ -50,11 +50,11 @@ export default async function AdminOrders({ searchParams }: PageProps<"/admin/or
       </ScrollRow>
 
       {orders.length === 0 ? (
-        <p className="rounded-2xl bg-white p-6 text-center text-sm text-gray-700 shadow-sm ring-1 ring-black/5">
+        <p className="rounded-[22px] bg-white p-6 text-center text-sm text-gray-700 shadow-card">
           No orders here. {status && "Nothing waiting at this step."}
         </p>
       ) : (
-        <ul className="divide-y divide-gray-100 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/5">
+        <ul className="divide-y divide-gray-100 overflow-hidden rounded-[22px] bg-white shadow-card">
           {orders.map((o) => (
             <li key={o.id}>
               <Link href={`/admin/orders/${o.code}`} className="flex items-center gap-3 px-4 py-3.5 hover:bg-gray-50">

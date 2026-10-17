@@ -23,7 +23,7 @@ export default async function OrdersPage() {
   const past = orders.filter((o) => ["delivered", "cancelled"].includes(o.status));
 
   const list = (rows: typeof orders) => (
-    <ul className="divide-y divide-gray-100 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/5">
+    <ul className="divide-y divide-gray-100 overflow-hidden rounded-[22px] bg-white shadow-card">
       {rows.map((o) => (
         <li key={o.id}>
           <Link href={`/order/${o.code}`} className="flex items-center gap-3 px-4 py-3.5 hover:bg-gray-50">
@@ -46,7 +46,7 @@ export default async function OrdersPage() {
 
   return (
     <div className="space-y-5 pt-4">
-      <h1 className="text-2xl font-bold">My orders</h1>
+      <h1 className="font-display text-3xl font-semibold">My orders</h1>
       {active.length > 0 && (
         <section>
           <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-700">In progress</h2>
@@ -60,7 +60,10 @@ export default async function OrdersPage() {
         </section>
       )}
       {orders.length === 0 && (
-        <p className="rounded-2xl bg-white p-5 text-center text-sm text-gray-700 shadow-sm ring-1 ring-black/5">
+        <div className="rounded-[22px] bg-white p-6 text-center text-sm text-gray-700 shadow-card">
+          {/* eslint-disable-next-line @next/next/no-img-element -- static SVG illustration */}
+          <img src="/illustrations/welcome_delivery.svg" alt="" className="mx-auto mb-2 h-36 w-auto" />
+          <p className="font-display text-xl font-semibold text-gray-900">No orders yet</p>
           No orders on this device yet.{" "}
           {!user && (
             <>
@@ -70,9 +73,9 @@ export default async function OrdersPage() {
               to see orders from your account.
             </>
           )}
-        </p>
+        </div>
       )}
-      <section className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5">
+      <section className="rounded-[22px] bg-white p-4 shadow-card">
         <h2 className="font-semibold">Track another order</h2>
         <p className="mb-3 text-sm text-gray-700">Enter the order ID and the mobile number used at checkout.</p>
         <TrackForm />

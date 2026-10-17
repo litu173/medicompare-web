@@ -16,7 +16,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const counts = orderCounts();
   const pending = (counts.placed ?? 0) + (counts.confirmed ?? 0) + (counts.packed ?? 0);
   return (
-    <div className="min-h-dvh bg-[#f5f7f6]">
+    <div className="min-h-dvh bg-ivory">
       <AdminNav pending={pending} userName={user.name} />
       <main className="px-4 pb-24 pt-4 md:ml-60 md:px-8 md:pb-10 md:pt-8 print:m-0 print:p-0">
         <div className="mx-auto max-w-5xl">{children}</div>

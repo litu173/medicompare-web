@@ -15,7 +15,15 @@ export type Quote = {
     available: boolean;
     maxQty: number;
     image: string | null;
-    cheaper: { medicineId: number; brandName: string; manufacturer: string; savePct: number } | null;
+    cheaper: {
+      medicineId: number;
+      brandName: string;
+      manufacturer: string;
+      savePct: number;
+      packId: number | null;
+      packLabel: string | null;
+      price: number | null;
+    } | null;
   }[];
   subtotal: number;
   deliveryFee: number;

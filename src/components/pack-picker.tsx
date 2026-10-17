@@ -52,12 +52,12 @@ export function PackPicker({
                 setPackId(p.id);
                 setQty(perPiece(p) ? 10 : 1);
               }}
-              className={`rounded-xl border p-3 text-left disabled:opacity-50 ${
+              className={`rounded-[18px] border p-3.5 text-left disabled:opacity-50 ${
                 p.id === pack.id ? "border-brand-600 bg-brand-50 ring-1 ring-brand-600" : "border-gray-200 bg-white"
               }`}
             >
               <p className="text-sm font-medium text-gray-900">{p.label}</p>
-              <p className="text-base font-bold tabular-nums">{taka(p.price)}</p>
+              <p className="font-display text-xl font-semibold tabular-nums">{taka(p.price)}</p>
               {p.qty > stock && <p className="text-[11px] text-red-600">Not enough stock</p>}
             </button>
           ))}
@@ -65,7 +65,7 @@ export function PackPicker({
       )}
 
       <div className="flex items-center gap-3">
-        <div className="flex h-11 items-center rounded-xl border border-gray-200 bg-white">
+        <div className="flex h-11 items-center rounded-full border border-brand-100 bg-brand-50 text-brand-700">
           <button
             type="button"
             aria-label="Decrease quantity"
@@ -95,7 +95,7 @@ export function PackPicker({
       {soldOut ? (
         <a
           href="#alternatives"
-          className="flex h-12 w-full items-center justify-center rounded-xl bg-gray-900 font-semibold text-white"
+          className="flex h-14 w-full items-center justify-center rounded-2xl bg-night font-bold text-white"
         >
           Out of stock — see alternatives
         </a>
@@ -104,7 +104,7 @@ export function PackPicker({
           <button
             type="button"
             onClick={doAdd}
-            className="flex h-12 items-center justify-center gap-2 rounded-xl border-2 border-brand-600 font-semibold text-brand-700"
+            className="flex h-14 items-center justify-center gap-2 rounded-2xl border-2 border-brand-600 font-bold text-brand-700 hover:bg-brand-50"
           >
             <ShoppingCart className="size-4.5" /> Add to cart
           </button>
@@ -114,7 +114,7 @@ export function PackPicker({
               doAdd();
               router.push("/cart");
             }}
-            className="h-12 rounded-xl bg-brand-600 font-semibold text-white"
+            className="h-14 rounded-2xl bg-brand-600 font-bold text-white hover:bg-brand-700"
           >
             Buy now
           </button>

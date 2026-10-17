@@ -30,7 +30,7 @@ export default async function InventoryItem({ params }: PageProps<"/admin/invent
   const inv = getInventoryRow(id);
   const packs = getPacks(id);
   const moves = getMovements(id);
-  const card = "rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5";
+  const card = "rounded-[22px] bg-white p-4 shadow-card";
   const lowAt = inv?.low_stock_at ?? 30;
 
   return (

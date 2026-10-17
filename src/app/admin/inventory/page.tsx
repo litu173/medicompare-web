@@ -71,7 +71,7 @@ export default async function InventoryPage({ searchParams }: PageProps<"/admin/
 
       <p className="text-sm text-gray-700">{total.toLocaleString()} products</p>
 
-      <ul className="divide-y divide-gray-100 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/5">
+      <ul className="divide-y divide-gray-100 overflow-hidden rounded-[22px] bg-white shadow-card">
         {rows.map((m) => {
           const low = m.stock > 0 && m.stock <= m.low_stock_at;
           return (

@@ -29,7 +29,7 @@ export function TrackForm() {
       </div>
       <button
         disabled={pending}
-        className="h-12 w-full rounded-xl bg-brand-600 font-semibold text-white hover:bg-brand-700 disabled:opacity-60"
+        className="h-12 w-full rounded-2xl bg-brand-600 font-semibold text-white hover:bg-brand-700 disabled:opacity-60"
       >
         {pending ? "Looking up…" : "Track order"}
       </button>

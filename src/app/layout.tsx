@@ -1,10 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Hind_Siliguri } from "next/font/google";
+import { Fraunces, Geist_Mono, Hind_Siliguri, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/components/cart-context";
 import { Toast } from "@/components/toast";
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
+const jakarta = Plus_Jakarta_Sans({ variable: "--font-jakarta", subsets: ["latin"] });
+const fraunces = Fraunces({ variable: "--font-fraunces", subsets: ["latin"], axes: ["opsz"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 const bangla = Hind_Siliguri({ variable: "--font-bangla", subsets: ["bengali", "latin"], weight: ["500", "700"] });
 
@@ -19,12 +20,15 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#0a7c60",
+  themeColor: "#04241c",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${bangla.variable} antialiased`}>
+    <html
+      lang="en"
+      className={`${jakarta.variable} ${fraunces.variable} ${geistMono.variable} ${bangla.variable} antialiased`}
+    >
       <body className="min-h-dvh font-sans">
         <CartProvider>
           {children}

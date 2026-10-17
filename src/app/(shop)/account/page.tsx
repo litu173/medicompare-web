@@ -30,7 +30,7 @@ export default async function AccountPage() {
 
   return (
     <div className="space-y-5 pt-4">
-      <section className="flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5">
+      <section className="flex items-center gap-3 rounded-[22px] bg-white p-4 shadow-card">
         <span className="grid size-12 place-items-center rounded-full bg-brand-100 text-lg font-bold text-brand-700">
           {user.name.charAt(0).toUpperCase()}
         </span>
@@ -58,9 +58,9 @@ export default async function AccountPage() {
           <Package className="size-5" /> Orders
         </h2>
         {orders.length === 0 ? (
-          <p className="rounded-xl bg-white p-4 text-sm text-gray-600 shadow-sm ring-1 ring-black/5">No orders yet.</p>
+          <p className="rounded-[22px] bg-white p-4 text-sm text-gray-600 shadow-card">No orders yet.</p>
         ) : (
-          <ul className="divide-y divide-gray-100 overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-black/5">
+          <ul className="divide-y divide-gray-100 overflow-hidden rounded-[22px] bg-white shadow-card">
             {orders.map((o) => (
               <li key={o.id}>
                 <Link href={`/order/${o.code}`} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50">
@@ -87,16 +87,13 @@ export default async function AccountPage() {
           <MapPin className="size-5" /> Saved addresses
         </h2>
         {addresses.length === 0 ? (
-          <p className="rounded-xl bg-white p-4 text-sm text-gray-600 shadow-sm ring-1 ring-black/5">
+          <p className="rounded-[22px] bg-white p-4 text-sm text-gray-600 shadow-card">
             Addresses you use at checkout are saved here.
           </p>
         ) : (
           <ul className="space-y-2">
             {addresses.map((a) => (
-              <li
-                key={a.id}
-                className="flex items-start gap-3 rounded-xl bg-white p-4 text-sm shadow-sm ring-1 ring-black/5"
-              >
+              <li key={a.id} className="flex items-start gap-3 rounded-[22px] bg-white p-4 text-sm shadow-card">
                 <span className="flex-1">
                   <b>{a.name}</b> · {a.phone}{" "}
                   {a.is_default ? <span className="ml-1 rounded bg-gray-100 px-1.5 text-[11px]">Default</span> : null}

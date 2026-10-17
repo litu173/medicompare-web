@@ -1,14 +1,29 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-brand-50: #ecfdf7;
-  --color-brand-100: #d1fae9;
+  --color-brand-50: #ecf8f2;
+  --color-brand-100: #d3f1e4;
   --color-brand-500: #0f9a77;
   /* 600/700 keep at least 4.5:1 contrast with white text. */
   --color-brand-600: #0a7c60;
   --color-brand-700: #086450;
   --color-brand-900: #063d31;
-  --font-sans: var(--font-geist-sans);
+  /* Sashroy luxury palette, shared with the app and landing page. */
+  --color-night: #04241c;
+  --color-night-2: #063328;
+  --color-night-3: #0a4536;
+  --color-mint: #7fe0bf;
+  --color-gold: #c9a45c;
+  --color-gold-2: #e2c88f;
+  --color-gold-deep: #8a6a2c;
+  --color-gold-bg: #f7eedb;
+  --color-ivory: #f7f4ec;
+  --color-line: #ece6d8;
+  --color-rose: #e98a7a;
+  --shadow-card: 0 12px 28px -10px rgb(4 36 28 / 0.1);
+  --shadow-lux: 0 18px 40px -12px rgb(4 36 28 / 0.25);
+  --font-sans: var(--font-jakarta);
+  --font-display: var(--font-fraunces);
   --font-mono: var(--font-geist-mono);
   --font-bangla: var(--font-bangla);
 }
@@ -18,8 +33,25 @@
 }
 
 body {
-  background: #f5f7f6;
-  color: #111827;
+  background: var(--color-ivory);
+  color: #10201b;
+}
+
+/* Small uppercase label used across the app ("eyebrow"). */
+.eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-gold-deep);
+}
+
+.bg-hero {
+  background: linear-gradient(135deg, var(--color-night), var(--color-night-2) 55%, var(--color-night-3));
+}
+
+.bg-gold-grad {
+  background: linear-gradient(90deg, var(--color-gold-2), var(--color-gold));
 }
 
 /* Tailwind v4 resets buttons to the default cursor; every clickable control shows the pointer. */
@@ -52,7 +84,7 @@ body {
 
 /* Room for the fixed bottom navigation + iOS home indicator. */
 .pb-safe {
-  padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+  padding-bottom: calc(7rem + env(safe-area-inset-bottom));
 }
 
 @media (min-width: 768px) {

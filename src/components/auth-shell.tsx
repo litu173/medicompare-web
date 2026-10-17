@@ -23,7 +23,7 @@ export function AuthShell({
   return (
     <div className="mx-auto max-w-sm space-y-5 pt-8">
       <div>
-        <h1 className="text-2xl font-bold">{title}</h1>
+        <h1 className="font-display text-3xl font-semibold">{title}</h1>
         <p className="mt-1 text-sm text-gray-600">{subtitle}</p>
       </div>
       {error && ERRORS[error] && (

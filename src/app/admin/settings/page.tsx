@@ -9,7 +9,7 @@ export default function SettingsPage() {
   return (
     <div className="max-w-xl space-y-4">
       <h1 className="text-2xl font-bold">Store settings</h1>
-      <section className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5">
+      <section className="rounded-[22px] bg-white p-4 shadow-card">
         <ActionForm action={updateSettings} submit="Save settings">
           <h2 className="font-semibold">Delivery charges (৳)</h2>
           <div className="grid gap-3 sm:grid-cols-3">
@@ -56,7 +56,7 @@ export default function SettingsPage() {
           </label>
         </ActionForm>
       </section>
-      <section className="rounded-2xl bg-white p-4 text-sm text-gray-800 shadow-sm ring-1 ring-black/5">
+      <section className="rounded-[22px] bg-white p-4 text-sm text-gray-800 shadow-card">
         <h2 className="mb-1 font-semibold">Admin access</h2>
         <p>
           Admins are the emails listed in <code className="rounded bg-gray-100 px-1">ADMIN_EMAILS</code> in the

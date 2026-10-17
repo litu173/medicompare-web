@@ -22,13 +22,13 @@ export default async function CompanyPage({ params, searchParams }: PageProps<"/
   return (
     <div className="space-y-4 pt-4">
       <div>
-        <h1 className="text-2xl font-bold">{company.name}</h1>
+        <h1 className="font-display text-3xl font-semibold">{company.name}</h1>
         <p className="text-sm text-gray-600">
           {company.brand_count} products · {company.generic_count} generics
         </p>
       </div>
 
-      <ul className="divide-y divide-gray-100 overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-black/5">
+      <ul className="divide-y divide-gray-100 overflow-hidden rounded-[22px] bg-white shadow-card">
         {items.map((m) => (
           <li key={m.id}>
             <Link href={`/medicine/${m.id}`} className="flex items-center gap-3 px-3 py-3 hover:bg-gray-50">

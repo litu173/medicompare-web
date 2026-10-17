@@ -10,10 +10,10 @@ export default function CompaniesPage() {
   return (
     <div className="space-y-4 pt-4">
       <div>
-        <h1 className="text-2xl font-bold">Companies</h1>
+        <h1 className="font-display text-3xl font-semibold">Companies</h1>
         <p className="text-sm text-gray-600">{list.length} manufacturers, sorted by number of products</p>
       </div>
-      <ul className="divide-y divide-gray-100 overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-black/5">
+      <ul className="divide-y divide-gray-100 overflow-hidden rounded-[22px] bg-white shadow-card">
         {list.map((c) => (
           <li key={c.id}>
             <Link href={`/company/${c.slug}`} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50">

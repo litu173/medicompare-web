@@ -1,129 +1,248 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { ScrollRow } from "@/components/scroll-row";
-import { chipCls } from "@/components/chip";
-import { ArrowRight, BadgePercent, PackageCheck, ShieldCheck, Truck } from "lucide-react";
+import {
+  ArrowUpRight,
+  ArrowLeftRight,
+  Building2,
+  Heart,
+  PackageCheck,
+  Search,
+  ShoppingBag,
+  Truck,
+  ShieldCheck,
+  PiggyBank,
+} from "lucide-react";
 import { SearchBox } from "@/components/search-box";
+import { ScrollRow } from "@/components/scroll-row";
+import { ShareButton } from "@/components/share-button";
 import { getBiggestGaps, getStats, POPULAR_SEARCHES } from "@/lib/catalog";
+import { savingsForVisitor } from "@/lib/savings";
+import { getCurrentUser } from "@/lib/auth";
 import { taka, savingsPct } from "@/lib/format";
 
-export default function Home() {
+function greeting(name?: string) {
+  const h = Number(new Date().toLocaleString("en-GB", { hour: "numeric", hour12: false, timeZone: "Asia/Dhaka" }));
+  const part = h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
+  const first = name?.trim().split(" ")[0];
+  return first ? `${part}, ${first}` : part;
+}
+
+export default async function Home() {
   const stats = getStats();
-  const gaps = getBiggestGaps(6);
+  const gaps = getBiggestGaps(8);
+  const user = await getCurrentUser();
+  const savings = await savingsForVisitor();
 
   return (
-    <div className="space-y-8 pt-6">
-      <section>
-        <h1 className="text-[26px] font-bold leading-tight tracking-tight text-gray-900 sm:text-3xl">
-          Same medicine. <span className="text-brand-600">Lower price.</span>
+    <div className="-mx-4 space-y-8">
+      {/* Dark hero, as in the app */}
+      <section className="bg-hero relative overflow-hidden rounded-b-[36px] px-5 pb-7 pt-4 text-white">
+        <div className="pointer-events-none absolute -right-16 -top-10 size-60 rounded-full bg-[radial-gradient(circle,rgba(15,154,119,.35),transparent_70%)]" />
+        <p className="relative text-sm text-white/75">{greeting(user?.name)}</p>
+        <h1 className="relative mt-1 font-display text-[38px] font-normal leading-[1.04] sm:text-5xl">
+          Same medicine.
+          <br />
+          <em className="font-light text-gold-2">Honest</em> price.
         </h1>
-        <p className="font-bangla mt-1 text-lg font-medium text-brand-700">একই ওষুধ, সাশ্রয়ী দামে</p>
-        <p className="mt-2 text-[15px] text-gray-600">
-          Search by brand or chemical (generic) name and see every equivalent brand sold in Bangladesh — cheapest first.
+        <p lang="bn" className="relative mt-2 font-bangla text-lg font-medium text-mint">
+          একই ওষুধ, সাশ্রয়ী দামে
         </p>
-        <div className="mt-4">
-          <Suspense fallback={<div className="h-13" />}>
+        <div className="relative mt-5">
+          <Suspense fallback={<div className="h-14" />}>
             <SearchBox />
           </Suspense>
         </div>
-        <div className="mt-3">
-          <ScrollRow label="Popular searches">
-            {POPULAR_SEARCHES.map((s) => (
-              <Link key={s} href={`/search?q=${encodeURIComponent(s)}`} className={chipCls()}>
-                {s}
-              </Link>
-            ))}
-          </ScrollRow>
-        </div>
-      </section>
-
-      <section className="grid grid-cols-3 gap-2 text-center">
-        {[
-          [stats.medicines.toLocaleString(), "medicines"],
-          [stats.generics.toLocaleString(), "generics"],
-          [stats.companies.toLocaleString(), "companies"],
-        ].map(([n, l]) => (
-          <div key={l} className="rounded-xl bg-white p-3 shadow-sm ring-1 ring-black/5">
-            <p className="text-lg font-bold text-gray-900">{n}</p>
-            <p className="text-xs text-gray-600">{l}</p>
-          </div>
-        ))}
-      </section>
-
-      <section>
-        <div className="mb-3 flex items-end justify-between">
-          <h2 className="text-lg font-semibold">Biggest price gaps</h2>
-          <span className="text-xs text-gray-600">same generic, strength & form</span>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          {gaps.map((g) => (
-            <Link
-              key={g.equiv_key}
-              href={`/medicine/${g.top_id}`}
-              className="group rounded-xl bg-white p-4 shadow-sm ring-1 ring-black/5 hover:ring-brand-500"
-            >
-              <p className="font-semibold text-gray-900">{g.generic_name}</p>
-              <p className="text-sm text-gray-600">
-                {g.strength} · {g.form_group} · {g.brands} brands
-              </p>
-              <div className="mt-3 flex items-end justify-between">
-                <div className="text-sm">
-                  <span className="font-semibold text-brand-700">{taka(g.min_price)}</span>
-                  <span className="text-gray-500"> – </span>
-                  <span className="text-gray-600 line-through decoration-red-400">{taka(g.max_price)}</span>
-                  <span className="text-xs text-gray-600"> /{g.unit}</span>
-                </div>
-                <span className="rounded-full bg-brand-100 px-2 py-0.5 text-xs font-bold text-brand-700">
-                  up to {savingsPct(g.min_price, g.max_price)}% less
-                </span>
-              </div>
-            </Link>
+        <div className="relative mt-4 grid grid-cols-3 gap-2 text-center">
+          {[
+            [stats.medicines.toLocaleString(), "medicines"],
+            [stats.generics.toLocaleString(), "generics"],
+            [stats.companies.toLocaleString(), "companies"],
+          ].map(([n, l]) => (
+            <div key={l} className="rounded-2xl border border-white/10 bg-white/5 py-3">
+              <p className="font-display text-xl">{n}</p>
+              <p className="text-[11px] text-white/65">{l}</p>
+            </div>
           ))}
         </div>
       </section>
 
-      <section className="grid grid-cols-2 gap-3">
-        {[
-          { icon: BadgePercent, t: "Always a cheaper option", d: "Every equivalent brand ranked by price per unit." },
-          { icon: PackageCheck, t: "Out of stock? Switch", d: "Alternatives in stock are shown instantly." },
-          { icon: ShieldCheck, t: "Same active ingredient", d: "Matched by generic, strength and dosage form." },
-          { icon: Truck, t: "Home delivery", d: "Cash on delivery across Bangladesh." },
-        ].map((f) => (
-          <div key={f.t} className="rounded-xl bg-white p-3.5 shadow-sm ring-1 ring-black/5">
-            <f.icon className="size-5 text-brand-600" />
-            <p className="mt-2 text-sm font-semibold">{f.t}</p>
-            <p className="mt-0.5 text-xs text-gray-600">{f.d}</p>
+      <div className="space-y-8 px-4">
+        {/* Savings */}
+        {savings.total >= 1 ? (
+          <section className="bg-gold-grad rounded-[26px] p-[2px] shadow-card">
+            <div className="flex items-center gap-4 rounded-[24px] bg-white p-5">
+              <div className="flex-1">
+                <p className="eyebrow">You have saved</p>
+                <p className="font-display text-4xl font-semibold text-brand-700">{taka(savings.total)}</p>
+                <p className="text-xs text-gray-600">
+                  vs the typical price, across {savings.orders} order{savings.orders === 1 ? "" : "s"}
+                </p>
+              </div>
+              <div className="flex flex-col items-center gap-2">
+                <span className="bg-gold-grad grid size-12 place-items-center rounded-full text-night">
+                  <PiggyBank className="size-6" />
+                </span>
+                <ShareButton
+                  text={`I saved ${taka(savings.total)} on my medicines with সাশ্রয় (Sashroy). Same medicine, cheaper brand.`}
+                />
+              </div>
+            </div>
+          </section>
+        ) : (
+          <section className="flex items-center gap-3 rounded-[22px] bg-white p-5 shadow-card">
+            <div className="flex-1">
+              <p className="eyebrow">Your savings</p>
+              <p className="mt-1 font-display text-xl font-semibold leading-snug">
+                Every order shows how much you saved.
+              </p>
+              <p className="mt-1 text-xs text-gray-600">Compared with the typical price of the same medicine.</p>
+              <Link
+                href="/search"
+                className="mt-3 inline-flex h-11 items-center gap-2 whitespace-nowrap rounded-2xl bg-brand-600 px-4 text-sm font-bold text-white hover:bg-brand-700"
+              >
+                <Search className="size-4" /> Start comparing
+              </Link>
+            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element -- static SVG illustration */}
+            <img
+              src="/illustrations/welcome_save.svg"
+              alt=""
+              className="h-24 w-24 shrink-0 object-contain sm:h-28 sm:w-28"
+            />
+          </section>
+        )}
+
+        {/* Quick actions */}
+        <section className="grid grid-cols-4 gap-2">
+          {[
+            { href: "/search", icon: ArrowLeftRight, label: "Compare" },
+            { href: "/orders", icon: Truck, label: "Track order" },
+            { href: "/companies", icon: Building2, label: "Companies" },
+            { href: "/app", icon: Heart, label: "Get the app" },
+          ].map((a) => (
+            <Link
+              key={a.label}
+              href={a.href}
+              className="flex flex-col items-center gap-2 rounded-2xl py-1 hover:bg-white/60"
+            >
+              <span className="grid size-14 place-items-center rounded-[20px] bg-white text-brand-600 shadow-card">
+                <a.icon className="size-6" />
+              </span>
+              <span className="text-xs font-bold">{a.label}</span>
+            </Link>
+          ))}
+        </section>
+
+        {/* Popular */}
+        <section>
+          <p className="eyebrow">Start here</p>
+          <h2 className="mb-3 font-display text-2xl font-semibold">Popular searches</h2>
+          <ScrollRow label="Popular searches">
+            {POPULAR_SEARCHES.map((s) => (
+              <Link
+                key={s}
+                href={`/search?q=${encodeURIComponent(s)}`}
+                className="flex shrink-0 snap-start items-center gap-1.5 rounded-full border border-line bg-white px-4 py-2.5 text-sm font-semibold hover:border-brand-600"
+              >
+                <Search className="size-4 text-brand-600" /> {s}
+              </Link>
+            ))}
+          </ScrollRow>
+        </section>
+
+        {/* Price gaps */}
+        <section>
+          <div className="mb-3 flex items-end justify-between">
+            <div>
+              <p className="eyebrow">Same medicine, different price</p>
+              <h2 className="font-display text-2xl font-semibold">Biggest price gaps</h2>
+            </div>
+            <Link href="/companies" className="text-sm font-bold text-brand-700">
+              Companies
+            </Link>
           </div>
-        ))}
-      </section>
+          <ScrollRow label="Biggest price gaps">
+            {gaps.map((g) => (
+              <Link
+                key={g.equiv_key}
+                href={`/medicine/${g.top_id}`}
+                className="bg-hero flex w-[270px] shrink-0 snap-start flex-col rounded-[24px] border border-gold/25 p-5 text-white shadow-lux"
+              >
+                <span className="flex items-start gap-2">
+                  <span className="flex-1 truncate font-display text-xl">{g.generic_name}</span>
+                  <ArrowUpRight className="size-5 text-gold-2" />
+                </span>
+                <span className="truncate text-xs text-white/65">
+                  {g.strength} · {g.form_group} · {g.brands} brands
+                </span>
+                <span className="mt-6 flex items-end gap-2">
+                  <span className="font-display text-3xl text-mint">{taka(g.min_price)}</span>
+                  <span className="pb-1 font-display text-sm text-white/55 line-through decoration-rose">
+                    {taka(g.max_price)}
+                  </span>
+                  <span className="pb-1 text-xs text-white/55">/{g.unit}</span>
+                </span>
+                <span className="bg-gold-grad mt-3 self-start rounded-full px-3 py-1 text-xs font-extrabold text-night">
+                  up to {savingsPct(g.min_price, g.max_price)}% less
+                </span>
+              </Link>
+            ))}
+          </ScrollRow>
+        </section>
 
-      <Link href="/companies" className="flex items-center justify-between rounded-xl bg-brand-900 p-4 text-white">
-        <div>
-          <p className="font-semibold">Browse by company</p>
-          <p className="text-sm text-white/85">See which products have cheaper equivalents</p>
-        </div>
-        <ArrowRight className="size-5" />
-      </Link>
+        {/* Community */}
+        <section className="rounded-[22px] bg-gold-bg p-6">
+          {/* eslint-disable-next-line @next/next/no-img-element -- static SVG illustration */}
+          <img src="/illustrations/community.svg" alt="Families using Sashroy" className="mx-auto h-32 w-auto" />
+          <p lang="bn" className="mt-4 font-bangla text-base text-gold-deep">
+            সবার জন্য সাশ্রয়
+          </p>
+          <h2 className="font-display text-2xl font-semibold">Saving is better together.</h2>
+          <p className="mt-2 text-sm leading-relaxed text-[#4a4232]">
+            Most people never learn a cheaper equal brand exists. Share Sashroy with your parents, neighbours and family
+            group so everyone pays a fair price for the same medicine.
+          </p>
+          <div className="mt-4">
+            <ShareButton
+              variant="dark"
+              label="Share with family"
+              text="সাশ্রয় (Sashroy) shows every brand of the same medicine side by side, cheapest first. Same medicine, honest price."
+            />
+          </div>
+        </section>
 
-      <Link
-        href="/app"
-        className="flex items-center justify-between rounded-xl bg-white p-4 shadow-sm ring-1 ring-black/5 hover:ring-brand-600"
-      >
-        <div>
-          <p className="font-semibold">Get the Android app</p>
-          <p className="text-sm text-gray-700">Download the test build to your phone</p>
-        </div>
-        <ArrowRight className="size-5 text-brand-700" />
-      </Link>
+        {/* How it works */}
+        <section>
+          <p className="eyebrow">Four calm steps</p>
+          <h2 className="mb-3 font-display text-2xl font-semibold">How Sashroy works</h2>
+          <ol className="divide-y divide-line overflow-hidden rounded-[22px] bg-white shadow-card">
+            {[
+              { icon: Search, t: "Search", d: "Type the brand on your prescription or the chemical name." },
+              { icon: ArrowLeftRight, t: "Compare", d: "Every equivalent, cheapest first, with stock and savings." },
+              { icon: ShoppingBag, t: "Order", d: "Choose your thana and pay cash on delivery." },
+              { icon: PackageCheck, t: "Receive", d: "Checked item by item, packed, and tracked to your door." },
+            ].map((s, i) => (
+              <li key={s.t} className="flex items-center gap-4 p-4">
+                <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-brand-50 text-brand-600">
+                  <s.icon className="size-5" />
+                </span>
+                <span>
+                  <span className="block font-extrabold">
+                    0{i + 1} · {s.t}
+                  </span>
+                  <span className="text-sm text-gray-600">{s.d}</span>
+                </span>
+              </li>
+            ))}
+          </ol>
+        </section>
 
-      <Link href="/orders" className="block text-center text-sm font-semibold text-brand-700">
-        Track an order
-      </Link>
-
-      <p className="pb-4 text-center text-[11px] leading-relaxed text-gray-500">
-        Information is for price comparison only and is not medical advice. Always consult a doctor or pharmacist before
-        switching medicines.
-      </p>
+        <p className="flex items-start gap-2 pb-4 text-center text-[11px] leading-relaxed text-gray-600">
+          <ShieldCheck className="mt-0.5 size-4 shrink-0" />
+          Information is for price comparison only and is not medical advice. Always consult a doctor or pharmacist
+          before switching medicines.
+        </p>
+      </div>
     </div>
   );
 }
