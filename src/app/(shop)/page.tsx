@@ -237,6 +237,11 @@ export default async function Home() {
           </ol>
         </section>
 
+        <nav className="flex justify-center gap-5 text-sm font-semibold text-brand-700">
+          <Link href="/privacy">Privacy policy</Link>
+          <Link href="/terms">Terms</Link>
+          <Link href="/app">Get the app</Link>
+        </nav>
         <p className="flex items-start gap-2 pb-4 text-center text-[11px] leading-relaxed text-gray-600">
           <ShieldCheck className="mt-0.5 size-4 shrink-0" />
           Information is for price comparison only and is not medical advice. Always consult a doctor or pharmacist

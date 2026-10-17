@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: "Get the app" };
 /** Latest Android build, published by the mobile repo's GitHub Actions workflow. */
 const APK_URL =
   process.env.ANDROID_APK_URL ??
-  "https://github.com/litu173/medicompare-mobile/releases/download/latest-android/medicompare.apk";
+  "https://github.com/litu173/medicompare-mobile/releases/download/latest-android/sashroy.apk";
 
 export default async function AppPage() {
   const qr = await QRCode.toString(APK_URL, { type: "svg", margin: 1, width: 180, color: { dark: "#063d31" } });
@@ -24,8 +24,8 @@ export default async function AppPage() {
     },
     {
       icon: Wifi,
-      t: "Connect to the server",
-      d: "In the app open Account → Server address and enter this computer's Wi-Fi address, e.g. 192.168.0.104:3000. The phone must be on the same Wi-Fi.",
+      t: "Open and start saving",
+      d: "The app connects to the live Sashroy store automatically. If it ever says it can't connect, tap Try again.",
     },
   ];
   return (
@@ -52,7 +52,7 @@ export default async function AppPage() {
             href={APK_URL}
             className="inline-flex h-12 items-center gap-2 rounded-2xl bg-brand-600 px-5 font-semibold text-white hover:bg-brand-700"
           >
-            <Download className="size-5" /> Download for Android (.apk)
+            <Download className="size-5" /> Download sashroy.apk
           </a>
           <p className="text-sm text-gray-700">
             On a computer? Scan the QR code with your phone&apos;s camera to download it there.
@@ -76,7 +76,8 @@ export default async function AppPage() {
         ))}
       </ol>
       <p className="text-xs text-gray-600">
-        Each new build is signed with a temporary key. If installing an update fails, uninstall the old app first.
+        New versions appear in the app under Settings → About. If installing an update fails, uninstall the old app
+        first.
       </p>
     </div>
   );

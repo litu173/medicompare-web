@@ -98,3 +98,29 @@ export function userFromToken(token: string | undefined): User | null {
 export async function getCurrentUser() {
   return userFromToken((await cookies()).get(SESSION_COOKIE)?.value);
 }
+
+export function updateProfile(userId: number, p: { name: string; phone: string | null }) {
+  db.prepare("UPDATE users SET name = ?, phone = ? WHERE id = ?").run(p.name, p.phone, userId);
+}
+
+export async function changePassword(userId: number, current: string, next: string) {
+  const row = db.prepare("SELECT password_hash FROM users WHERE id = ?").get(userId) as
+    { password_hash: string | null } | undefined;
+  // Google-only accounts have no password yet and may set one.
+  if (row?.password_hash && !(await verifyPassword(current, row.password_hash))) return false;
+  db.prepare("UPDATE users SET password_hash = ? WHERE id = ?").run(await hashPassword(next), userId);
+  return true;
+}
+
+/**
+ * Deletes an account: sessions and saved addresses are removed and the user row is anonymised.
+ * Orders are kept (unlinked) because the pharmacy must keep sales records.
+ */
+export function deleteAccount(userId: number) {
+  db.transaction(() => {
+    db.prepare("DELETE FROM sessions WHERE user_id = ?").run(userId);
+    db.prepare("DELETE FROM addresses WHERE user_id = ?").run(userId);
+    db.prepare("UPDATE orders SET user_id = NULL WHERE user_id = ?").run(userId);
+    db.prepare("DELETE FROM users WHERE id = ?").run(userId);
+  })();
+}
